@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import { SafeImage } from '@/components/ui/safe-image'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Scale, FileText, Briefcase, Users, Shield, Home } from 'lucide-react'
 
@@ -89,15 +90,21 @@ export default function ServiciosPage() {
                   key={servicio.title} 
                   className="border-2 card-hover hover:border-primary/50 cursor-pointer group overflow-hidden"
                 >
-                  <div className="relative h-48 w-full">
-                    <Image
-                      src={[
-                        "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
-                        "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
-                        "https://images.unsplash.com/photo-1582407947304-fd86f028f716?ixlib=rb-4.0.3&auto=format&fit=crop&w=2076&q=80",
-                        "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
-                        "https://images.unsplash.com/photo-1556761175-4b46a572b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=1974&q=80"
-                      ][index % 5]}
+                  <div className="relative h-48 w-full bg-gray-200">
+                    <SafeImage
+                      src={`/assets/images/servicios/judiciales/servicio-judicial-${index + 1}.jpg`}
+                      fallbackSrc={[
+                        // Causas Proteccionales y Violencia Intrafamiliar - Familia/protección
+                        "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+                        // Divorcios, Alimentos y Cuidado Personal - Justicia/balance
+                        "https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3&auto=format&fit=crop&w=2011&q=80",
+                        // Causas Laborales - Oficina/trabajo
+                        "https://images.unsplash.com/photo-1497366216548-37526070297c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2069&q=80",
+                        // Representación en Causas Penales - Justicia/legal
+                        "https://images.unsplash.com/photo-1559329007-40df8a9345d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=2025&q=80",
+                        // Juicios de Responsabilidad Civil - Documentos legales
+                        "https://images.unsplash.com/photo-1591696205602-2f950c417dad?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
+                      ][index]}
                       alt={servicio.title}
                       fill
                       className="object-cover transition-transform duration-500 group-hover:scale-110"
@@ -131,16 +138,23 @@ export default function ServiciosPage() {
                   key={servicio.title} 
                   className="border-2 card-hover hover:border-primary/50 cursor-pointer group overflow-hidden"
                 >
-                  <div className="relative h-48 w-full">
-                    <Image
-                      src={[
-                        "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
-                        "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
-                        "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+                  <div className="relative h-48 w-full bg-gray-200">
+                    <SafeImage
+                      src={`/assets/images/servicios/extrajudiciales/servicio-extrajudicial-${index + 1}.jpg`}
+                      fallbackSrc={[
+                        // Constitución de Empresas - Negocios/empresas
                         "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
-                        "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
-                        "https://images.unsplash.com/photo-1556761175-4b46a572b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=1974&q=80"
-                      ][index % 6]}
+                        // Saneamiento de Propiedades - Propiedades/edificios
+                        "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+                        // Compraventa de Inmuebles - Bienes raíces/edificios
+                        "https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=2073&q=80",
+                        // Contratos de Promesa - Documentos/firma
+                        "https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=2015&q=80",
+                        // Estudios de Título - Documentos/análisis
+                        "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?ixlib=rb-4.0.3&auto=format&fit=crop&w=2073&q=80",
+                        // Otros - Oficina legal general
+                        "https://images.unsplash.com/photo-1507679799987-c73779587ccf?ixlib=rb-4.0.3&auto=format&fit=crop&w=2071&q=80"
+                      ][index]}
                       alt={servicio.title}
                       fill
                       className="object-cover transition-transform duration-500 group-hover:scale-110"

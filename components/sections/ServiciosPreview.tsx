@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import Image from 'next/image'
+import { SafeImage } from '@/components/ui/safe-image'
 import { Scale, Briefcase, FileText, Building2 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -51,9 +51,13 @@ export function ServiciosPreview() {
               key={servicio.title} 
               className="border-2 card-hover hover:border-primary/50 cursor-pointer group overflow-hidden"
             >
-              <div className="relative h-48 w-full">
-                <Image
+              <div className="relative h-48 w-full bg-gray-200">
+                <SafeImage
                   src={index === 0 
+                    ? "/assets/images/servicios/preview/servicios-preview-judiciales.jpg"
+                    : "/assets/images/servicios/preview/servicios-preview-extrajudiciales.jpg"
+                  }
+                  fallbackSrc={index === 0 
                     ? "https://images.unsplash.com/photo-1556761175-4b46a572b786?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80"
                     : "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
                   }
