@@ -103,7 +103,7 @@ export default function ServiciosPage() {
                         // Representación en Causas Penales - Justicia/legal
                         "https://images.unsplash.com/photo-1559329007-40df8a9345d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=2025&q=80",
                         // Juicios de Responsabilidad Civil - Documentos legales
-                        "https://images.unsplash.com/photo-1507679799987-c73779587ccf?ixlib=rb-4.0.3&auto=format&fit=crop&w=2071&q=80"
+                        "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
                       ][index]}
                       alt={servicio.title}
                       fill
