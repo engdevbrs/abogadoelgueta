@@ -68,9 +68,9 @@ function getEmailTemplate(content: string): string {
             color: #e2e8f0 !important;
             text-shadow: 0 1px 2px rgba(0,0,0,0.2) !important;
           }
-          /* Footer - mantener colores brillantes */
+          /* Footer - colores neutros para modo oscuro */
           .email-footer {
-            background-color: #1a3a5a !important;
+            background-color: #2d3748 !important;
           }
           .email-footer p {
             color: #ffffff !important;
@@ -89,14 +89,14 @@ function getEmailTemplate(content: string): string {
           .email-videocall-link {
             color: #cbd5e0 !important;
           }
-          /* Botones - mantener visibilidad */
+          /* Botones - colores neutros para modo oscuro */
           .email-button {
-            background-color: #1a3a5a !important;
+            background-color: #4a5568 !important;
             color: #ffffff !important;
-            border: 1px solid #4a7a9a !important;
+            border: 1px solid #2d3748 !important;
           }
           .email-button:hover {
-            background-color: #2a5a7a !important;
+            background-color: #3a4655 !important;
           }
           /* Mejorar contraste de enlaces */
           a {
@@ -132,11 +132,11 @@ function getEmailTemplate(content: string): string {
             <table role="presentation" class="email-content" style="width: 100%; max-width: 600px; background-color: #ffffff; border-collapse: collapse; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin: 0 auto;">
               <!-- Header -->
               <tr>
-                <td class="email-header" style="background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%); padding: 30px 20px; text-align: center;"></td>
-                  <h1 class="email-header" style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700; letter-spacing: 0.5px; text-shadow: 0 1px 2px rgba(0,0,0,0.2);">
+                <td class="email-header" style="background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%); padding: 30px 20px; text-align: center;">
+                  <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700; letter-spacing: 0.5px; text-shadow: 0 1px 2px rgba(0,0,0,0.2);">
                     Abogado Elgueta
                   </h1>
-                  <p class="email-header" style="margin: 8px 0 0 0; color: #e2e8f0; font-size: 14px; font-weight: 300; text-shadow: 0 1px 2px rgba(0,0,0,0.2);">
+                  <p style="margin: 8px 0 0 0; color: #e2e8f0; font-size: 14px; font-weight: 300; text-shadow: 0 1px 2px rgba(0,0,0,0.2);">
                     Asesoría Legal Profesional
                   </p>
                 </td>
@@ -149,7 +149,7 @@ function getEmailTemplate(content: string): string {
               </tr>
               <!-- Footer -->
               <tr>
-                <td class="email-footer" style="background-color: #0a1e3a; padding: 20px 30px; text-align: center;">
+                <td class="email-footer" style="background-color: #2d3748; padding: 20px 30px; text-align: center;">
                   <p class="email-footer" style="margin: 0; color: #ffffff; font-size: 12px; line-height: 1.5;">
                     Este es un correo automático, por favor no responda a este mensaje.<br>
                     © ${new Date().getFullYear()} Abogado Elgueta. Todos los derechos reservados.
@@ -524,20 +524,20 @@ export async function sendAprobacionCitaEmail(
         </div>
       </div>
       
-      <h2 class="email-text" style="color: #0a1e3a; margin: 0 0 20px 0; font-size: 24px; font-weight: 600;">
+      <h2 class="email-text" style="color: #2d3748; margin: 0 0 20px 0; font-size: 24px; font-weight: 600;">
         ¡Bienvenido/a!
       </h2>
       
       <p class="email-text" style="margin: 0 0 16px 0; font-size: 16px; color: #333333;">
-        Estimado/a <strong style="color: #0a1e3a;">${data.nombre}</strong>,
+        Estimado/a <strong style="color: #2d3748;">${data.nombre}</strong>,
       </p>
       
       <p class="email-text-secondary" style="margin: 0 0 30px 0; font-size: 16px; color: #555555; line-height: 1.6;">
-        Nos complace informarle que su solicitud de consulta sobre: <strong style="color: #0a1e3a;">${data.motivoConsulta}</strong> ha sido aprobada.
+        Nos complace informarle que su solicitud de consulta sobre: <strong style="color: #2d3748;">${data.motivoConsulta}</strong> ha sido aprobada.
       </p>
       
-      <div class="email-card" style="background-color: #f8f9fa; border-left: 4px solid #0a1e3a; padding: 20px; margin: 30px 0; border-radius: 4px;">
-        <h3 style="color: #0a1e3a; margin: 0 0 15px 0; font-size: 18px; font-weight: 600;">
+      <div class="email-card" style="background-color: #f8f9fa; border-left: 4px solid #4a5568; padding: 20px; margin: 30px 0; border-radius: 4px;">
+        <h3 style="color: #2d3748; margin: 0 0 15px 0; font-size: 18px; font-weight: 600;">
           📅 Detalles de la Consulta
         </h3>
         <table style="width: 100%; border-collapse: collapse;">
@@ -594,9 +594,18 @@ export async function sendAprobacionCitaEmail(
       </p>
     `
 
+    // Enviar el email al cliente y también a adrianep@elguetabogado.cl
+    // El remitente (from) se mantiene como adrianep@elguetabogado.cl
+    // NOTA: adelguetap@gmail.com NO recibe este email, solo crea y envía las invitaciones de Google Calendar
+    const recipients = [to] // Cliente
+    if (ADMIN_EMAIL && ADMIN_EMAIL !== to) {
+      recipients.push(ADMIN_EMAIL) // Agregar adrianep@elguetabogado.cl
+    }
+    // adelguetap@gmail.com NO se incluye en los destinatarios del email
+
     const { data: emailData, error } = await resend.emails.send({
-      from: FROM_EMAIL,
-      to: [to, GOOGLE_CALENDAR_EMAIL],
+      from: FROM_EMAIL, // Remitente: adrianep@elguetabogado.cl
+      to: recipients,
       subject: '✅ Su Consulta ha sido Aprobada - Abogado Elgueta',
       html: getEmailTemplate(htmlContent),
       text: `

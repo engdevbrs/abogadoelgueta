@@ -107,6 +107,10 @@ export async function PATCH(
           
           const endTime = new Date(startTime.getTime() + 60 * 60 * 1000) // 1 hora después
 
+          // Agregar adrianep@elguetabogado.cl como asistente adicional
+          // adelguetap@gmail.com NO se agrega como asistente, solo es el organizador que crea el evento
+          const adminEmail = process.env.ADMIN_EMAIL || 'adrianep@elguetabogado.cl'
+          
           const meetEvent = await createGoogleMeetEvent({
             summary: `Consulta Legal: ${cita.motivoConsulta}`,
             description: `Consulta legal solicitada por ${cita.nombre}`,
@@ -114,6 +118,10 @@ export async function PATCH(
             endTime,
             attendeeEmail: cita.email,
             attendeeName: cita.nombre,
+            additionalAttendees: [
+              adminEmail, // adrianep@elguetabogado.cl debe recibir la invitación
+              // NOTA: adelguetap@gmail.com no se agrega aquí, solo es el organizador que crea y envía las invitaciones
+            ],
           })
 
           googleMeetLink = meetEvent.meetLink

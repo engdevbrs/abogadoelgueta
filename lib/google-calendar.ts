@@ -44,6 +44,7 @@ export async function createGoogleMeetEvent(data: {
   endTime: Date
   attendeeEmail?: string
   attendeeName?: string
+  additionalAttendees?: string[] // Nuevo campo para asistentes adicionales
 }) {
   try {
     // Verificar que los tokens estén configurados
@@ -73,27 +74,34 @@ export async function createGoogleMeetEvent(data: {
 
     const calendar = google.calendar({ version: 'v3', auth })
 
-    // Preparar lista de asistentes
-    const googleCalendarEmail = process.env.GOOGLE_CALENDAR_EMAIL || 'adelguetap@gmail.com'
+    // Preparar lista de asistentes (evitando duplicados)
+    // NOTA: adelguetap@gmail.com es el organizador (usa los tokens OAuth), pero NO se agrega como asistente
     const attendees = []
+    const addedEmails = new Set<string>()
     
     // Agregar el cliente si hay email
     if (data.attendeeEmail) {
+      const clientEmail = data.attendeeEmail.toLowerCase()
       attendees.push({
         email: data.attendeeEmail,
         displayName: data.attendeeName || 'Cliente',
       })
+      addedEmails.add(clientEmail)
     }
     
-    // Agregar el email de Google Calendar como asistente
-    // Importante: aunque el evento se crea en el calendario de adelguetap@gmail.com,
-    // también debe estar en la lista de asistentes para recibir notificaciones
-    attendees.push({
-      email: googleCalendarEmail,
-      displayName: 'Abogado Adrián Elgueta',
-    })
+    // Agregar asistentes adicionales (evitando duplicados)
+    // No incluimos adelguetap@gmail.com aquí, solo el cliente y adrianep@elguetabogado.cl
+    if (data.additionalAttendees) {
+      data.additionalAttendees.forEach(email => {
+        if (email && !addedEmails.has(email.toLowerCase())) {
+          attendees.push({ email })
+          addedEmails.add(email.toLowerCase())
+        }
+      })
+    }
 
-    console.log('Asistentes del evento:', attendees.map(a => `${a.displayName} (${a.email})`).join(', '))
+    console.log('Asistentes del evento:', attendees.map(a => `${a.displayName || a.email} (${a.email})`).join(', '))
+    console.log('Nota: adelguetap@gmail.com es el organizador (no aparece como asistente)')
 
     // Crear el evento con Google Meet
     const event = {
