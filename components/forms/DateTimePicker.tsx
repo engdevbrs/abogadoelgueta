@@ -93,7 +93,13 @@ export function DateTimePicker({ value, onChange, error }: DateTimePickerProps) 
     }
   }
 
-  const handleFechaClick = (fecha: string) => {
+  const handleFechaClick = (fecha: string, e?: React.MouseEvent) => {
+    // Prevenir comportamiento por defecto y propagación
+    if (e) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
+    
     setFechaSeleccionada(fecha)
     setHoraSeleccionada('')
     setHorarios([])
@@ -104,7 +110,13 @@ export function DateTimePicker({ value, onChange, error }: DateTimePickerProps) 
     }
   }
 
-  const handleHoraClick = (hora: string) => {
+  const handleHoraClick = (hora: string, e?: React.MouseEvent) => {
+    // Prevenir comportamiento por defecto y propagación
+    if (e) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
+    
     setHoraSeleccionada(hora)
     
     if (fechaSeleccionada && hora) {
@@ -161,16 +173,17 @@ export function DateTimePicker({ value, onChange, error }: DateTimePickerProps) 
                 <button
                   key={fecha.fecha}
                   type="button"
-                  onClick={() => handleFechaClick(fecha.fecha)}
+                  onClick={(e) => handleFechaClick(fecha.fecha, e)}
+                  onMouseDown={(e) => e.preventDefault()} // Prevenir doble clic en móviles
                   className={cn(
-                    "relative p-4 rounded-lg border-2 transition-all duration-200 text-left",
-                    "hover:shadow-md hover:scale-105",
+                    "relative p-4 rounded-lg border-2 transition-all duration-200 text-left cursor-pointer",
+                    "hover:shadow-md hover:scale-105 active:scale-95",
                     estaSeleccionada
                       ? "border-primary bg-primary/5 shadow-md"
                       : "border-gray-200 bg-white hover:border-primary/50"
                   )}
                 >
-                  <div className="flex flex-col gap-1">
+                  <div className="flex flex-col gap-1 pointer-events-none">
                     <div className="text-xs text-gray-500 uppercase font-medium">
                       {fechaCorta.diaSemana}
                     </div>
@@ -222,16 +235,17 @@ export function DateTimePicker({ value, onChange, error }: DateTimePickerProps) 
                   <button
                     key={hora}
                     type="button"
-                    onClick={() => handleHoraClick(hora)}
+                    onClick={(e) => handleHoraClick(hora, e)}
+                    onMouseDown={(e) => e.preventDefault()} // Prevenir doble clic en móviles
                     className={cn(
-                      "py-2.5 px-2 sm:px-3 rounded-lg border-2 transition-all duration-200",
-                      "hover:shadow-md hover:scale-105",
+                      "py-2.5 px-2 sm:px-3 rounded-lg border-2 transition-all duration-200 cursor-pointer",
+                      "hover:shadow-md hover:scale-105 active:scale-95",
                       estaSeleccionada
                         ? "border-primary bg-primary text-white shadow-md"
                         : "border-gray-200 bg-white text-gray-900 hover:border-primary/50"
                     )}
                   >
-                    <div className="flex items-center justify-center gap-1 whitespace-nowrap">
+                    <div className="flex items-center justify-center gap-1 whitespace-nowrap pointer-events-none">
                       <span className={cn(
                         "text-sm font-bold",
                         estaSeleccionada ? "text-white" : "text-gray-900"

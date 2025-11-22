@@ -65,7 +65,7 @@ function getEmailTemplate(content: string): string {
             text-shadow: 0 1px 2px rgba(0,0,0,0.2) !important;
           }
           .email-header p {
-            color: #e2e8f0 !important;
+            color: #ffffff !important;
             text-shadow: 0 1px 2px rgba(0,0,0,0.2) !important;
           }
           /* Footer - colores neutros para modo oscuro */
@@ -81,10 +81,10 @@ function getEmailTemplate(content: string): string {
             border: 2px solid #4a5568 !important;
           }
           .email-videocall-section h3 {
-            color: #ffffff !important;
+            color: #000000 !important;
           }
           .email-videocall-section p {
-            color: #e2e8f0 !important;
+            color: #1a1a1a !important;
           }
           .email-videocall-link {
             color: #cbd5e0 !important;
@@ -133,10 +133,10 @@ function getEmailTemplate(content: string): string {
               <!-- Header -->
               <tr>
                 <td class="email-header" style="background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%); padding: 30px 20px; text-align: center;">
-                  <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700; letter-spacing: 0.5px; text-shadow: 0 1px 2px rgba(0,0,0,0.2);">
+                  <h1 style="margin: 0; color: #ffffff !important; font-size: 28px; font-weight: 700; letter-spacing: 0.5px; text-shadow: 0 1px 2px rgba(0,0,0,0.2);">
                     Abogado Elgueta
                   </h1>
-                  <p style="margin: 8px 0 0 0; color: #e2e8f0; font-size: 14px; font-weight: 300; text-shadow: 0 1px 2px rgba(0,0,0,0.2);">
+                  <p style="margin: 8px 0 0 0; color: #ffffff !important; font-size: 14px; font-weight: 300; text-shadow: 0 1px 2px rgba(0,0,0,0.2);">
                     Asesoría Legal Profesional
                   </p>
                 </td>
@@ -347,6 +347,7 @@ export async function sendPagoPendienteCitaEmail(
           day: 'numeric',
           hour: '2-digit',
           minute: '2-digit',
+          timeZone: 'America/Santiago', // Especificar zona horaria de Chile
         }).format(new Date(data.fechaSolicitada))
       : 'A confirmar'
 
@@ -514,6 +515,7 @@ export async function sendAprobacionCitaEmail(
           day: 'numeric',
           hour: '2-digit',
           minute: '2-digit',
+          timeZone: 'America/Santiago', // Especificar zona horaria de Chile
         }).format(new Date(data.fechaSolicitada))
       : 'A confirmar'
 
@@ -555,10 +557,10 @@ export async function sendAprobacionCitaEmail(
       ${data.googleMeetLink ? `
       <!-- Videollamada -->
       <div class="email-videocall-section" style="background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%); border: 2px solid #4a5568; border-radius: 8px; padding: 30px; margin: 30px 0; text-align: center;">
-        <h3 class="email-videocall-section" style="color: #2d3748; margin: 0 0 15px 0; font-size: 20px; font-weight: 600;">
+        <h3 class="email-videocall-section" style="color: #000000 !important; margin: 0 0 15px 0; font-size: 20px; font-weight: 600;">
           🎥 Unirse a la Videollamada
         </h3>
-        <p class="email-text-secondary email-videocall-section" style="margin: 0 0 20px 0; font-size: 15px; color: #4a5568; line-height: 1.6;">
+        <p class="email-text-secondary email-videocall-section" style="margin: 0 0 20px 0; font-size: 15px; color: #1a1a1a !important; line-height: 1.6;">
           Puede unirse a la consulta mediante Google Meet en el siguiente enlace:
         </p>
         <a href="${data.googleMeetLink || '#'}" class="email-button" style="display: inline-block; background-color: #4a5568; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; margin: 10px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.2); border: 1px solid #2d3748;">
@@ -665,6 +667,7 @@ export async function sendNotificacionNuevaCitaEmail(
           day: 'numeric',
           hour: '2-digit',
           minute: '2-digit',
+          timeZone: 'America/Santiago', // Especificar zona horaria de Chile
         }).format(new Date(data.fechaSolicitada))
       : 'No especificada'
 
