@@ -69,17 +69,24 @@ export async function GET(request: NextRequest) {
     const fechasLaborables = obtenerFechasLaborables()
     
     // Obtener citas aprobadas para verificar disponibilidad
-    const citasAprobadas = await prisma.cita.findMany({
-      where: {
-        estado: 'APROBADA',
-        fechaSolicitada: {
-          not: null,
+    let citasAprobadas = []
+    try {
+      citasAprobadas = await prisma.cita.findMany({
+        where: {
+          estado: 'APROBADA',
+          fechaSolicitada: {
+            not: null,
+          },
         },
-      },
-      select: {
-        fechaSolicitada: true,
-      },
-    })
+        select: {
+          fechaSolicitada: true,
+        },
+      })
+    } catch (dbError) {
+      console.error('Error de base de datos al obtener citas:', dbError)
+      // Si falla la BD, continuar sin filtrar horarios ocupados
+      citasAprobadas = []
+    }
     
     // Crear set de horarios ocupados
     const horariosOcupados = new Set<string>()
@@ -181,8 +188,28 @@ export async function GET(request: NextRequest) {
     })
   } catch (error) {
     console.error('Error obteniendo horarios disponibles:', error)
+    
+    // Mejor información de error para debugging
+    const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
+    const errorStack = error instanceof Error ? error.stack : undefined
+    
+    console.error('Error details:', {
+      message: errorMessage,
+      stack: errorStack,
+      env: process.env.NODE_ENV,
+      hasDatabaseUrl: !!process.env.DATABASE_URL,
+    })
+    
+    // En producción, no exponer detalles del error al cliente
+    const isProduction = process.env.NODE_ENV === 'production'
+    
     return NextResponse.json(
-      { success: false, error: 'Error al obtener horarios disponibles' },
+      { 
+        success: false, 
+        error: isProduction 
+          ? 'Error al obtener horarios disponibles. Por favor, intenta nuevamente.' 
+          : `Error al obtener horarios disponibles: ${errorMessage}`,
+      },
       { status: 500 }
     )
   }
