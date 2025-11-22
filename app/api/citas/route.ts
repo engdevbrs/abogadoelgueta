@@ -3,6 +3,10 @@ import { prisma } from '@/lib/prisma'
 import { sendConfirmacionCitaEmail, sendNotificacionNuevaCitaEmail } from '@/lib/email'
 import { z } from 'zod'
 
+// Forzar renderizado dinámico para evitar error en build
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
 const solicitudCitaSchema = z.object({
   nombre: z.string().min(2),
   email: z.string().email(),

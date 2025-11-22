@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
+// Forzar renderizado dinámico para evitar error en build
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
 /**
  * Genera horarios disponibles para citas
  * - Lunes a viernes
