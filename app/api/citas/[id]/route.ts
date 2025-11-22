@@ -118,11 +118,32 @@ export async function PATCH(
 
           googleMeetLink = meetEvent.meetLink
           updateData.googleMeetLink = googleMeetLink
-        } catch (error) {
-          console.error('Error creando evento de Google Meet:', error)
-          console.error('El administrador deberá agregar el enlace de Google Meet manualmente después de aprobar la cita.')
-          // Si falla, dejamos googleMeetLink como null/undefined
-          // El email se enviará sin link y el administrador puede agregarlo después
+          updateData.googleEventId = meetEvent.eventId
+          updateData.googleHtmlLink = meetEvent.htmlLink
+          
+          console.log('✅ Evento de Google Calendar creado exitosamente')
+          console.log('Event ID:', meetEvent.eventId)
+          console.log('HTML Link:', meetEvent.htmlLink)
+        } catch (error: any) {
+          console.error('❌ Error creando evento de Google Meet:', error)
+          console.error('Error message:', error?.message)
+          console.error('Error code:', error?.code)
+          if (error?.response) {
+            console.error('Error response:', JSON.stringify(error.response.data, null, 2))
+            console.error('Error status:', error.response.status)
+          }
+          
+          // Si el error es de autenticación, intentar refrescar tokens
+          if (error?.code === 401 || error?.message?.includes('unauthorized') || error?.message?.includes('invalid_grant')) {
+            console.error('⚠️ Error de autenticación detectado. Los tokens pueden haber expirado.')
+            console.error('⚠️ Necesitas regenerar los tokens de Google OAuth.')
+          }
+          
+          // Generar link simple como fallback
+          const { generateGoogleMeetLink } = await import('@/lib/google-calendar')
+          googleMeetLink = generateGoogleMeetLink()
+          updateData.googleMeetLink = googleMeetLink
+          console.warn('⚠️ Usando link simple de Google Meet como fallback (evento no creado en calendario)')
         }
       } else {
         console.warn('Google Calendar API no está configurado. El administrador debe agregar el enlace de Google Meet manualmente.')

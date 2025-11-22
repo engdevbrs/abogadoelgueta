@@ -6,6 +6,7 @@ const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KE
 
 const FROM_EMAIL = process.env.FROM_EMAIL || 'adrianep@elguetabogado.cl'
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'adrianep@elguetabogado.cl'
+const GOOGLE_CALENDAR_EMAIL = process.env.GOOGLE_CALENDAR_EMAIL || 'adelguetap@gmail.com'
 const BANCO_CUENTA = process.env.BANCO_CUENTA || 'Cuenta bancaria pendiente de configuración'
 const BANCO_TIPO = process.env.BANCO_TIPO || 'Tipo de cuenta'
 const BANCO_NUMERO = process.env.BANCO_NUMERO || 'Número de cuenta'
@@ -27,10 +28,20 @@ function getEmailTemplate(content: string): string {
       <meta name="supported-color-schemes" content="light dark">
       <title>Abogado Elgueta</title>
       <style>
+        /* Contenedor principal - márgenes verticales aumentados */
+        .email-container {
+          padding-top: 80px !important;
+          padding-bottom: 80px !important;
+          padding-left: 20px !important;
+          padding-right: 20px !important;
+        }
+        
         /* Soporte para modo oscuro */
         @media (prefers-color-scheme: dark) {
           .email-container {
             background-color: #1a1a1a !important;
+            padding-top: 80px !important;
+            padding-bottom: 80px !important;
           }
           .email-content {
             background-color: #2d2d2d !important;
@@ -44,6 +55,48 @@ function getEmailTemplate(content: string): string {
           }
           .email-card {
             background-color: #3a3a3a !important;
+          }
+          /* Header - mantener colores brillantes en modo oscuro */
+          .email-header {
+            background: linear-gradient(135deg, #1a3a5a 0%, #2a5a7a 100%) !important;
+          }
+          .email-header h1 {
+            color: #ffffff !important;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3) !important;
+          }
+          .email-header p {
+            color: #f0f0f0 !important;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3) !important;
+          }
+          /* Footer - mantener colores brillantes */
+          .email-footer {
+            background-color: #1a3a5a !important;
+          }
+          .email-footer p {
+            color: #ffffff !important;
+          }
+          /* Sección de videollamada - mejor contraste */
+          .email-videocall-section {
+            background: linear-gradient(135deg, #2a4a6a 0%, #3a5a8a 100%) !important;
+            border: 2px solid #4a7a9a !important;
+          }
+          .email-videocall-section h3 {
+            color: #ffffff !important;
+          }
+          .email-videocall-section p {
+            color: #f0f0f0 !important;
+          }
+          .email-videocall-link {
+            color: #e0f0ff !important;
+          }
+          /* Botones - mantener visibilidad */
+          .email-button {
+            background-color: #1a3a5a !important;
+            color: #ffffff !important;
+            border: 1px solid #4a7a9a !important;
+          }
+          .email-button:hover {
+            background-color: #2a5a7a !important;
           }
           /* Mejorar contraste de enlaces */
           a {
@@ -73,17 +126,17 @@ function getEmailTemplate(content: string): string {
       </style>
     </head>
     <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f4f4f4; line-height: 1.6; color: #333333;">
-      <table role="presentation" class="email-container" style="width: 100%; border-collapse: collapse; background-color: #f4f4f4; padding: 60px 20px;">
+      <table role="presentation" class="email-container" style="width: 100%; border-collapse: collapse; background-color: #f4f4f4; padding: 80px 20px 80px 20px;">
         <tr>
           <td align="center" style="padding: 0;">
             <table role="presentation" class="email-content" style="width: 100%; max-width: 600px; background-color: #ffffff; border-collapse: collapse; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin: 0 auto;">
               <!-- Header -->
               <tr>
-                <td style="background: linear-gradient(135deg, #0a1e3a 0%, #1a3a5a 100%); padding: 30px 20px; text-align: center;">
-                  <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700; letter-spacing: 0.5px;">
+                <td class="email-header" style="background: linear-gradient(135deg, #0a1e3a 0%, #1a3a5a 100%); padding: 30px 20px; text-align: center;">
+                  <h1 class="email-header" style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700; letter-spacing: 0.5px; text-shadow: 0 1px 3px rgba(0,0,0,0.2);">
                     Abogado Elgueta
                   </h1>
-                  <p style="margin: 8px 0 0 0; color: #e0e0e0; font-size: 14px; font-weight: 300;">
+                  <p class="email-header" style="margin: 8px 0 0 0; color: #f0f0f0; font-size: 14px; font-weight: 300; text-shadow: 0 1px 2px rgba(0,0,0,0.2);">
                     Asesoría Legal Profesional
                   </p>
                 </td>
@@ -96,8 +149,8 @@ function getEmailTemplate(content: string): string {
               </tr>
               <!-- Footer -->
               <tr>
-                <td style="background-color: #0a1e3a; padding: 20px 30px; text-align: center;">
-                  <p style="margin: 0; color: #ffffff; font-size: 12px; line-height: 1.5;">
+                <td class="email-footer" style="background-color: #0a1e3a; padding: 20px 30px; text-align: center;">
+                  <p class="email-footer" style="margin: 0; color: #ffffff; font-size: 12px; line-height: 1.5;">
                     Este es un correo automático, por favor no responda a este mensaje.<br>
                     © ${new Date().getFullYear()} Abogado Elgueta. Todos los derechos reservados.
                   </p>
@@ -500,19 +553,19 @@ export async function sendAprobacionCitaEmail(
       </div>
 
       ${data.googleMeetLink ? `
-      <div style="background: linear-gradient(135deg, #e8f4f8 0%, #d1e7dd 100%); border: 2px solid #0a1e3a; border-radius: 8px; padding: 30px; margin: 30px 0; text-align: center;">
-        <h3 style="color: #0a1e3a; margin: 0 0 15px 0; font-size: 20px; font-weight: 600;">
+      <div class="email-videocall-section" style="background: linear-gradient(135deg, #e8f4f8 0%, #d1e7dd 100%); border: 2px solid #0a1e3a; border-radius: 8px; padding: 30px; margin: 30px 0; text-align: center;">
+        <h3 class="email-videocall-section" style="color: #0a1e3a; margin: 0 0 15px 0; font-size: 20px; font-weight: 600;">
           🎥 Unirse a la Videollamada
         </h3>
-        <p class="email-text-secondary" style="margin: 0 0 20px 0; font-size: 15px; color: #555555; line-height: 1.6;">
+        <p class="email-text-secondary email-videocall-section" style="margin: 0 0 20px 0; font-size: 15px; color: #555555; line-height: 1.6;">
           Puede unirse a la consulta mediante Google Meet en el siguiente enlace:
         </p>
-        <a href="${data.googleMeetLink || '#'}" style="display: inline-block; background-color: #0a1e3a; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; margin: 10px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+        <a href="${data.googleMeetLink || '#'}" class="email-button" style="display: inline-block; background-color: #0a1e3a; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; margin: 10px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.2); border: 1px solid #1a3a5a;">
           Unirse a Google Meet
         </a>
-        <p style="margin: 20px 0 0 0; font-size: 13px; color: #666666; line-height: 1.6;">
+        <p class="email-videocall-section" style="margin: 20px 0 0 0; font-size: 13px; color: #666666; line-height: 1.6;">
           O copie este enlace en su navegador:<br>
-          <span style="word-break: break-all; font-family: monospace; color: #0a1e3a;">${data.googleMeetLink || 'Pendiente'}</span>
+          <span class="email-videocall-link" style="word-break: break-all; font-family: monospace; color: #0a1e3a;">${data.googleMeetLink || 'Pendiente'}</span>
         </p>
       </div>
       ` : `
@@ -542,7 +595,7 @@ export async function sendAprobacionCitaEmail(
 
     const { data: emailData, error } = await resend.emails.send({
       from: FROM_EMAIL,
-      to: [to],
+      to: [to, GOOGLE_CALENDAR_EMAIL],
       subject: '✅ Su Consulta ha sido Aprobada - Abogado Elgueta',
       html: getEmailTemplate(htmlContent),
       text: `
@@ -674,7 +727,7 @@ export async function sendNotificacionNuevaCitaEmail(
       </div>
 
       <div style="text-align: center; margin: 30px 0;">
-        <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard" class="email-button">
+        <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://www.elguetabogado.cl'}/dashboard" class="email-button">
           Ver Solicitud en el Dashboard
         </a>
       </div>
@@ -709,7 +762,7 @@ export async function sendNotificacionNuevaCitaEmail(
 
         ID de la solicitud: ${data.citaId}
 
-        Ver solicitud en el dashboard: ${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard
+        Ver solicitud en el dashboard: ${process.env.NEXT_PUBLIC_APP_URL || 'https://www.elguetabogado.cl'}/dashboard
       `,
     })
 

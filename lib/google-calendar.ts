@@ -12,16 +12,24 @@ if (process.env.GOOGLE_ACCESS_TOKEN && process.env.GOOGLE_REFRESH_TOKEN) {
   auth.setCredentials({
     access_token: process.env.GOOGLE_ACCESS_TOKEN,
     refresh_token: process.env.GOOGLE_REFRESH_TOKEN,
+    expiry_date: process.env.GOOGLE_TOKEN_EXPIRY ? parseInt(process.env.GOOGLE_TOKEN_EXPIRY) : undefined,
   })
   
   // Configurar refresh automático de tokens
   auth.on('tokens', (tokens) => {
     if (tokens.refresh_token) {
       // Si Google devuelve un nuevo refresh_token, guardarlo
-      console.log('Nuevo refresh_token recibido (deberías actualizar .env si es necesario)')
+      console.log('⚠️ Nuevo refresh_token recibido (deberías actualizar .env si es necesario)')
+      console.log('⚠️ Nuevo refresh_token:', tokens.refresh_token.substring(0, 20) + '...')
     }
     if (tokens.access_token) {
-      console.log('Access token actualizado automáticamente')
+      console.log('✅ Access token actualizado automáticamente')
+      // Actualizar en memoria
+      auth.setCredentials({
+        access_token: tokens.access_token,
+        refresh_token: process.env.GOOGLE_REFRESH_TOKEN,
+        expiry_date: tokens.expiry_date,
+      })
     }
   })
 }
@@ -43,8 +51,25 @@ export async function createGoogleMeetEvent(data: {
       throw new Error('Google Calendar API no está configurado. Faltan tokens de acceso.')
     }
 
+    // Verificar que las credenciales estén configuradas
+    if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+      throw new Error('Google Calendar API no está configurado. Faltan CLIENT_ID o CLIENT_SECRET.')
+    }
+
     // Asegurar que los tokens estén actualizados
-    await auth.refreshAccessToken()
+    try {
+      const { credentials } = await auth.refreshAccessToken()
+      if (credentials?.access_token) {
+        auth.setCredentials(credentials)
+        console.log('✅ Access token refrescado exitosamente')
+      }
+    } catch (refreshError: any) {
+      console.error('❌ Error refrescando access token:', refreshError)
+      if (refreshError?.message?.includes('invalid_grant')) {
+        throw new Error('Los tokens de Google han expirado. Necesitas regenerar los tokens de OAuth.')
+      }
+      throw refreshError
+    }
 
     const calendar = google.calendar({ version: 'v3', auth })
 
@@ -68,14 +93,22 @@ export async function createGoogleMeetEvent(data: {
           },
         },
       },
-      attendees: data.attendeeEmail
-        ? [
-            {
-              email: data.attendeeEmail,
-              displayName: data.attendeeName,
-            },
-          ]
-        : undefined,
+      attendees: [
+        ...(data.attendeeEmail
+          ? [
+              {
+                email: data.attendeeEmail,
+                displayName: data.attendeeName,
+              },
+            ]
+          : []),
+        // Agregar el email de Google Calendar como asistente
+        {
+          email: process.env.GOOGLE_CALENDAR_EMAIL || 'adelguetap@gmail.com',
+          displayName: 'Abogado Adrián Elgueta',
+          organizer: false,
+        },
+      ],
     }
 
     console.log('Creando evento en Google Calendar...')
