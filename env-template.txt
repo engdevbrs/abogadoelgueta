@@ -1,0 +1,35 @@
+# Base de datos
+# Para desarrollo local con SQLite (más fácil de configurar)
+DATABASE_URL="file:./dev.db"
+
+# Para producción o desarrollo con PostgreSQL, usar:
+# DATABASE_URL="postgresql://usuario:password@localhost:5432/abogado_elgueta?schema=public"
+
+# NextAuth
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_SECRET="cambiar-este-secreto-por-uno-seguro-generado-con-openssl-rand-base64-32"
+
+# Credenciales del administrador (para crear el usuario inicial)
+ADMIN_EMAIL="admin@abogadoelgueta.cl"
+ADMIN_PASSWORD="admin123"
+ADMIN_NAME="Adrian Elgueta Pincheira"
+
+# Resend (Email) - Opcional por ahora
+# Obtén tu API key de https://resend.com
+RESEND_API_KEY=""
+FROM_EMAIL="noreply@abogadoelgueta.cl"
+ADMIN_EMAIL_NOTIFICATIONS="admin@abogadoelgueta.cl"
+
+# Información bancaria (configurar después)
+BANCO_CUENTA="Banco de Chile"
+BANCO_TIPO="Cuenta Corriente"
+BANCO_NUMERO="1234567890"
+
+# Google Calendar API (Opcional - para Google Meet links automáticos)
+# Si no configuras esto, el sistema generará links simples de Google Meet
+GOOGLE_CLIENT_ID=""
+GOOGLE_CLIENT_SECRET=""
+GOOGLE_REDIRECT_URI="http://localhost:3000/api/auth/callback/google"
+GOOGLE_ACCESS_TOKEN=""
+GOOGLE_REFRESH_TOKEN=""
+

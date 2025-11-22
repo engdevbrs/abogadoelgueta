@@ -1,0 +1,62 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String
+  name          String
+  role          String    @default("ADMIN")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  citasAprobadas Cita[]
+
+  @@map("users")
+}
+
+model Cita {
+  id                String    @id @default(cuid())
+  nombre            String
+  email             String
+  telefono          String?
+  motivoConsulta    String
+  mensaje           String?
+  estado            String    @default("PENDIENTE")
+  fechaSolicitada   DateTime?
+  googleMeetLink    String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  aprobadaAt        DateTime?
+  aprobadaPorId     String?
+  aprobadaPor       User?     @relation(fields: [aprobadaPorId], references: [id], onDelete: SetNull)
+
+  @@map("citas")
+}
+
+model Contacto {
+  id        String   @id @default(cuid())
+  nombre    String
+  email     String
+  telefono  String?
+  asunto    String
+  mensaje   String
+  leido     Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@map("contactos")
+}
+
+// Enums convertidos a String para compatibilidad con SQLite
+// Role: ADMIN
+// EstadoCita: PENDIENTE, PAGO_PENDIENTE, APROBADA, RECHAZADA, COMPLETADA, CANCELADA
+
