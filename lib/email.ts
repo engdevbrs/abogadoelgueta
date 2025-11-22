@@ -4,8 +4,8 @@ import { Resend } from 'resend'
 // Si no hay API key, Resend fallará silenciosamente en desarrollo
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null
 
-const FROM_EMAIL = process.env.FROM_EMAIL || 'noreply@abogadoelgueta.cl'
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@abogadoelgueta.cl'
+const FROM_EMAIL = process.env.FROM_EMAIL || 'adrianep@elguetabogado.cl'
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'adrianep@elguetabogado.cl'
 const BANCO_CUENTA = process.env.BANCO_CUENTA || 'Cuenta bancaria pendiente de configuración'
 const BANCO_TIPO = process.env.BANCO_TIPO || 'Tipo de cuenta'
 const BANCO_NUMERO = process.env.BANCO_NUMERO || 'Número de cuenta'
@@ -13,7 +13,7 @@ const BANCO_RUT = process.env.BANCO_RUT || ''
 const BANCO_NOMBRE_TITULAR = process.env.BANCO_NOMBRE_TITULAR || 'Abogado Elgueta'
 
 /**
- * Template base HTML para emails
+ * Template base HTML para emails con soporte para modo claro y oscuro
  */
 function getEmailTemplate(content: string): string {
   return `
@@ -23,13 +23,60 @@ function getEmailTemplate(content: string): string {
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta name="color-scheme" content="light dark">
+      <meta name="supported-color-schemes" content="light dark">
       <title>Abogado Elgueta</title>
+      <style>
+        /* Soporte para modo oscuro */
+        @media (prefers-color-scheme: dark) {
+          .email-container {
+            background-color: #1a1a1a !important;
+          }
+          .email-content {
+            background-color: #2d2d2d !important;
+            color: #e0e0e0 !important;
+          }
+          .email-text {
+            color: #e0e0e0 !important;
+          }
+          .email-text-secondary {
+            color: #b0b0b0 !important;
+          }
+          .email-card {
+            background-color: #3a3a3a !important;
+          }
+          /* Mejorar contraste de enlaces */
+          a {
+            color: #60a5fa !important;
+          }
+        }
+        
+        /* Asegurar que los textos principales sean legibles */
+        .email-text {
+          color: #333333;
+        }
+        .email-text-secondary {
+          color: #555555;
+        }
+        .email-card {
+          background-color: #f8f9fa;
+        }
+        
+        /* Prevenir inversión automática problemática en modo oscuro */
+        [data-ogsc] .email-container {
+          background-color: #f4f4f4 !important;
+        }
+        [data-ogsc] .email-content {
+          background-color: #ffffff !important;
+          color: #333333 !important;
+        }
+      </style>
     </head>
-    <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f4f4f4; line-height: 1.6; color: #333;">
-      <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #f4f4f4; padding: 20px 0;">
+    <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f4f4f4; line-height: 1.6; color: #333333;">
+      <table role="presentation" class="email-container" style="width: 100%; border-collapse: collapse; background-color: #f4f4f4; padding: 20px 0;">
         <tr>
           <td align="center">
-            <table role="presentation" style="width: 100%; max-width: 600px; background-color: #ffffff; border-collapse: collapse; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <table role="presentation" class="email-content" style="width: 100%; max-width: 600px; background-color: #ffffff; border-collapse: collapse; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
               <!-- Header -->
               <tr>
                 <td style="background: linear-gradient(135deg, #0a1e3a 0%, #1a3a5a 100%); padding: 30px 20px; text-align: center;">
@@ -43,7 +90,7 @@ function getEmailTemplate(content: string): string {
               </tr>
               <!-- Content -->
               <tr>
-                <td style="padding: 40px 30px;">
+                <td class="email-content" style="padding: 40px 30px; background-color: #ffffff; color: #333333;">
                   ${content}
                 </td>
               </tr>
@@ -70,10 +117,16 @@ interface ConfirmacionCitaData {
   motivoConsulta: string
 }
 
+interface PagoPendienteCitaData {
+  nombre: string
+  motivoConsulta: string
+  fechaSolicitada?: Date | null
+}
+
 interface AprobacionCitaData {
   nombre: string
   motivoConsulta: string
-  googleMeetLink: string
+  googleMeetLink?: string
   fechaSolicitada?: Date | null
 }
 
@@ -91,51 +144,51 @@ export async function sendConfirmacionCitaEmail(
 
   try {
     const htmlContent = `
-      <h2 style="color: #0a1e3a; margin: 0 0 20px 0; font-size: 24px; font-weight: 600;">
+      <h2 class="email-text" style="color: #0a1e3a; margin: 0 0 20px 0; font-size: 24px; font-weight: 600;">
         Confirmación de Solicitud de Consulta
       </h2>
       
-      <p style="margin: 0 0 16px 0; font-size: 16px; color: #333;">
+      <p class="email-text" style="margin: 0 0 16px 0; font-size: 16px; color: #333333;">
         Estimado/a <strong style="color: #0a1e3a;">${data.nombre}</strong>,
       </p>
       
-      <p style="margin: 0 0 20px 0; font-size: 16px; color: #555; line-height: 1.6;">
+      <p class="email-text-secondary" style="margin: 0 0 20px 0; font-size: 16px; color: #555555; line-height: 1.6;">
         Hemos recibido su solicitud de consulta legal sobre: <strong style="color: #0a1e3a;">${data.motivoConsulta}</strong>
       </p>
       
-      <p style="margin: 0 0 30px 0; font-size: 16px; color: #555; line-height: 1.6;">
+      <p class="email-text-secondary" style="margin: 0 0 30px 0; font-size: 16px; color: #555555; line-height: 1.6;">
         Su solicitud ha sido registrada y está pendiente de revisión y aprobación.
       </p>
       
-      <div style="background-color: #f8f9fa; border-left: 4px solid #0a1e3a; padding: 20px; margin: 30px 0; border-radius: 4px;">
+      <div class="email-card" style="background-color: #f8f9fa; border-left: 4px solid #0a1e3a; padding: 20px; margin: 30px 0; border-radius: 4px;">
         <h3 style="color: #0a1e3a; margin: 0 0 15px 0; font-size: 18px; font-weight: 600;">
           💳 Información de Pago
         </h3>
-        <p style="margin: 0 0 12px 0; font-size: 15px; color: #555; line-height: 1.6;">
+        <p class="email-text-secondary" style="margin: 0 0 12px 0; font-size: 15px; color: #555555; line-height: 1.6;">
           Para procesar su solicitud, le solicitamos realizar el abono correspondiente a la siguiente cuenta:
         </p>
         <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
           <tr>
-            <td style="padding: 8px 0; font-weight: 600; color: #333; font-size: 14px; width: 140px;">Banco:</td>
-            <td style="padding: 8px 0; color: #555; font-size: 14px;">${BANCO_CUENTA}</td>
+            <td class="email-text" style="padding: 8px 0; font-weight: 600; color: #333333; font-size: 14px; width: 140px;">Banco:</td>
+            <td class="email-text-secondary" style="padding: 8px 0; color: #555555; font-size: 14px;">${BANCO_CUENTA}</td>
           </tr>
           <tr>
-            <td style="padding: 8px 0; font-weight: 600; color: #333; font-size: 14px;">Tipo de Cuenta:</td>
-            <td style="padding: 8px 0; color: #555; font-size: 14px;">${BANCO_TIPO}</td>
+            <td class="email-text" style="padding: 8px 0; font-weight: 600; color: #333333; font-size: 14px;">Tipo de Cuenta:</td>
+            <td class="email-text-secondary" style="padding: 8px 0; color: #555555; font-size: 14px;">${BANCO_TIPO}</td>
           </tr>
           <tr>
-            <td style="padding: 8px 0; font-weight: 600; color: #333; font-size: 14px;">Número de Cuenta:</td>
-            <td style="padding: 8px 0; color: #555; font-size: 14px; font-family: monospace;">${BANCO_NUMERO}</td>
+            <td class="email-text" style="padding: 8px 0; font-weight: 600; color: #333333; font-size: 14px;">Número de Cuenta:</td>
+            <td class="email-text-secondary" style="padding: 8px 0; color: #555555; font-size: 14px; font-family: monospace; word-break: break-all;">${BANCO_NUMERO}</td>
           </tr>
           ${BANCO_RUT ? `
           <tr>
-            <td style="padding: 8px 0; font-weight: 600; color: #333; font-size: 14px;">RUT:</td>
-            <td style="padding: 8px 0; color: #555; font-size: 14px;">${BANCO_RUT}</td>
+            <td class="email-text" style="padding: 8px 0; font-weight: 600; color: #333333; font-size: 14px;">RUT:</td>
+            <td class="email-text-secondary" style="padding: 8px 0; color: #555555; font-size: 14px;">${BANCO_RUT}</td>
           </tr>
           ` : ''}
           <tr>
-            <td style="padding: 8px 0; font-weight: 600; color: #333; font-size: 14px;">Titular:</td>
-            <td style="padding: 8px 0; color: #555; font-size: 14px;">${BANCO_NOMBRE_TITULAR}</td>
+            <td class="email-text" style="padding: 8px 0; font-weight: 600; color: #333333; font-size: 14px;">Titular:</td>
+            <td class="email-text-secondary" style="padding: 8px 0; color: #555555; font-size: 14px;">${BANCO_NOMBRE_TITULAR}</td>
           </tr>
         </table>
       </div>
@@ -144,16 +197,16 @@ export async function sendConfirmacionCitaEmail(
         <p style="margin: 0 0 12px 0; font-size: 15px; color: #0a1e3a; font-weight: 600;">
           ⏳ Próximos Pasos
         </p>
-        <p style="margin: 0; font-size: 14px; color: #555; line-height: 1.6;">
+        <p class="email-text-secondary" style="margin: 0; font-size: 14px; color: #555555; line-height: 1.6;">
           Una vez que hayamos verificado el pago, aprobaremos su solicitud y le enviaremos un correo con el enlace para unirse a la videollamada mediante Google Meet.
         </p>
       </div>
       
-      <p style="margin: 30px 0 0 0; font-size: 15px; color: #555; line-height: 1.6;">
+      <p class="email-text-secondary" style="margin: 30px 0 0 0; font-size: 15px; color: #555555; line-height: 1.6;">
         Si tiene alguna consulta, no dude en contactarnos.
       </p>
       
-      <p style="margin: 30px 0 0 0; font-size: 15px; color: #333; line-height: 1.6;">
+      <p class="email-text" style="margin: 30px 0 0 0; font-size: 15px; color: #333333; line-height: 1.6;">
         Atentamente,<br>
         <strong style="color: #0a1e3a;">Abogado Elgueta</strong>
       </p>
@@ -198,6 +251,173 @@ export async function sendConfirmacionCitaEmail(
 }
 
 /**
+ * Envía email cuando una cita se marca como Pago Pendiente
+ */
+export async function sendPagoPendienteCitaEmail(
+  to: string,
+  data: PagoPendienteCitaData
+) {
+  if (!resend) {
+    console.warn('Resend no está configurado. Email no enviado.')
+    return null
+  }
+
+  try {
+    const fecha = data.fechaSolicitada 
+      ? new Intl.DateTimeFormat('es-CL', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        }).format(new Date(data.fechaSolicitada))
+      : 'A confirmar'
+
+    const htmlContent = `
+      <div style="text-align: center; margin-bottom: 30px;">
+        <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #ffffff; padding: 15px; border-radius: 8px; display: inline-block;">
+          <p style="margin: 0; font-size: 18px; font-weight: 600;">⏳ Pago Pendiente</p>
+        </div>
+      </div>
+      
+      <h2 class="email-text" style="color: #0a1e3a; margin: 0 0 20px 0; font-size: 24px; font-weight: 600;">
+        Recordatorio de Pago
+      </h2>
+      
+      <p class="email-text" style="margin: 0 0 16px 0; font-size: 16px; color: #333333;">
+        Estimado/a <strong style="color: #0a1e3a;">${data.nombre}</strong>,
+      </p>
+      
+      <p class="email-text-secondary" style="margin: 0 0 20px 0; font-size: 16px; color: #555555; line-height: 1.6;">
+        Le recordamos que su solicitud de consulta legal sobre: <strong style="color: #0a1e3a;">${data.motivoConsulta}</strong> está pendiente de pago.
+      </p>
+      
+      ${data.fechaSolicitada ? `
+      <div class="email-card" style="background-color: #f8f9fa; border-left: 4px solid #0a1e3a; padding: 20px; margin: 30px 0; border-radius: 4px;">
+        <h3 style="color: #0a1e3a; margin: 0 0 15px 0; font-size: 18px; font-weight: 600;">
+          📅 Fecha de Consulta Solicitada
+        </h3>
+        <p class="email-text-secondary" style="margin: 0; font-size: 16px; color: #555555; font-weight: 600;">
+          ${fecha}
+        </p>
+      </div>
+      ` : ''}
+      
+      <div style="background-color: #fff3cd; border-left: 4px solid #f59e0b; padding: 20px; margin: 30px 0; border-radius: 4px;">
+        <h3 style="color: #856404; margin: 0 0 15px 0; font-size: 18px; font-weight: 600;">
+          ⚠️ Importante
+        </h3>
+        <p style="margin: 0 0 12px 0; font-size: 15px; color: #856404; line-height: 1.6;">
+          Para proceder con la aprobación de su consulta, necesitamos verificar el pago correspondiente.
+        </p>
+        <p style="margin: 0; font-size: 15px; color: #856404; line-height: 1.6;">
+          Una vez verificado el pago, aprobaremos su solicitud y le enviaremos el enlace para unirse a la videollamada mediante Google Meet.
+        </p>
+      </div>
+      
+      <div class="email-card" style="background-color: #f8f9fa; border-left: 4px solid #0a1e3a; padding: 20px; margin: 30px 0; border-radius: 4px;">
+        <h3 style="color: #0a1e3a; margin: 0 0 15px 0; font-size: 18px; font-weight: 600;">
+          💳 Información de Pago
+        </h3>
+        <p class="email-text-secondary" style="margin: 0 0 12px 0; font-size: 15px; color: #555555; line-height: 1.6;">
+          Por favor, realice el abono correspondiente a la siguiente cuenta:
+        </p>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+          <tr>
+            <td class="email-text" style="padding: 8px 0; font-weight: 600; color: #333333; font-size: 14px; width: 140px;">Banco:</td>
+            <td class="email-text-secondary" style="padding: 8px 0; color: #555555; font-size: 14px;">${BANCO_CUENTA}</td>
+          </tr>
+          <tr>
+            <td class="email-text" style="padding: 8px 0; font-weight: 600; color: #333333; font-size: 14px;">Tipo de Cuenta:</td>
+            <td class="email-text-secondary" style="padding: 8px 0; color: #555555; font-size: 14px;">${BANCO_TIPO}</td>
+          </tr>
+          <tr>
+            <td class="email-text" style="padding: 8px 0; font-weight: 600; color: #333333; font-size: 14px;">Número de Cuenta:</td>
+            <td class="email-text-secondary" style="padding: 8px 0; color: #555555; font-size: 14px; font-family: monospace; word-break: break-all;">${BANCO_NUMERO}</td>
+          </tr>
+          ${BANCO_RUT ? `
+          <tr>
+            <td class="email-text" style="padding: 8px 0; font-weight: 600; color: #333333; font-size: 14px;">RUT:</td>
+            <td class="email-text-secondary" style="padding: 8px 0; color: #555555; font-size: 14px;">${BANCO_RUT}</td>
+          </tr>
+          ` : ''}
+          <tr>
+            <td class="email-text" style="padding: 8px 0; font-weight: 600; color: #333333; font-size: 14px;">Titular:</td>
+            <td class="email-text-secondary" style="padding: 8px 0; color: #555555; font-size: 14px;">${BANCO_NOMBRE_TITULAR}</td>
+          </tr>
+        </table>
+      </div>
+
+      <div style="background-color: #e8f4f8; border: 1px solid #0a1e3a; border-radius: 6px; padding: 20px; margin: 30px 0; text-align: center;">
+        <p style="margin: 0 0 12px 0; font-size: 15px; color: #0a1e3a; font-weight: 600;">
+          ⏳ Próximos Pasos
+        </p>
+        <p class="email-text-secondary" style="margin: 0; font-size: 14px; color: #555555; line-height: 1.6;">
+          Una vez que hayamos verificado el pago, aprobaremos su solicitud y le enviaremos un correo con el enlace para unirse a la videollamada mediante Google Meet.
+        </p>
+      </div>
+      
+      <p class="email-text-secondary" style="margin: 30px 0 0 0; font-size: 15px; color: #555555; line-height: 1.6;">
+        Si ya realizó el pago o tiene alguna consulta, no dude en contactarnos.
+      </p>
+      
+      <p class="email-text" style="margin: 30px 0 0 0; font-size: 15px; color: #333333; line-height: 1.6;">
+        Atentamente,<br>
+        <strong style="color: #0a1e3a;">Abogado Elgueta</strong>
+      </p>
+    `
+
+    const { data: emailData, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: [to],
+      subject: '⏳ Pago Pendiente - Abogado Elgueta',
+      html: getEmailTemplate(htmlContent),
+      text: `
+        Pago Pendiente - Abogado Elgueta
+
+        Estimado/a ${data.nombre},
+
+        Le recordamos que su solicitud de consulta legal sobre: ${data.motivoConsulta} está pendiente de pago.
+
+        ${data.fechaSolicitada ? `
+        Fecha de Consulta Solicitada:
+        ${fecha}
+        ` : ''}
+
+        IMPORTANTE:
+        Para proceder con la aprobación de su consulta, necesitamos verificar el pago correspondiente.
+        Una vez verificado el pago, aprobaremos su solicitud y le enviaremos el enlace para unirse a la videollamada mediante Google Meet.
+
+        Información de Pago:
+        Banco: ${BANCO_CUENTA}
+        Tipo de Cuenta: ${BANCO_TIPO}
+        Número de Cuenta: ${BANCO_NUMERO}
+        ${BANCO_RUT ? `RUT: ${BANCO_RUT}` : ''}
+        Titular: ${BANCO_NOMBRE_TITULAR}
+
+        Próximos Pasos:
+        Una vez que hayamos verificado el pago, aprobaremos su solicitud y le enviaremos un correo con el enlace para unirse a la videollamada mediante Google Meet.
+
+        Si ya realizó el pago o tiene alguna consulta, no dude en contactarnos.
+
+        Atentamente,
+        Abogado Elgueta
+      `,
+    })
+
+    if (error) {
+      console.error('Error enviando email:', error)
+      throw error
+    }
+
+    return emailData
+  } catch (error) {
+    console.error('Error en sendPagoPendienteCitaEmail:', error)
+    throw error
+  }
+}
+
+/**
  * Envía email cuando una cita es aprobada con el link de Google Meet
  */
 export async function sendAprobacionCitaEmail(
@@ -222,54 +442,62 @@ export async function sendAprobacionCitaEmail(
 
     const htmlContent = `
       <div style="text-align: center; margin-bottom: 30px;">
-        <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 15px; border-radius: 8px; display: inline-block;">
+        <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; padding: 15px; border-radius: 8px; display: inline-block;">
           <p style="margin: 0; font-size: 18px; font-weight: 600;">✓ Su Consulta ha sido Aprobada</p>
         </div>
       </div>
       
-      <h2 style="color: #0a1e3a; margin: 0 0 20px 0; font-size: 24px; font-weight: 600;">
+      <h2 class="email-text" style="color: #0a1e3a; margin: 0 0 20px 0; font-size: 24px; font-weight: 600;">
         ¡Bienvenido/a!
       </h2>
       
-      <p style="margin: 0 0 16px 0; font-size: 16px; color: #333;">
+      <p class="email-text" style="margin: 0 0 16px 0; font-size: 16px; color: #333333;">
         Estimado/a <strong style="color: #0a1e3a;">${data.nombre}</strong>,
       </p>
       
-      <p style="margin: 0 0 30px 0; font-size: 16px; color: #555; line-height: 1.6;">
+      <p class="email-text-secondary" style="margin: 0 0 30px 0; font-size: 16px; color: #555555; line-height: 1.6;">
         Nos complace informarle que su solicitud de consulta sobre: <strong style="color: #0a1e3a;">${data.motivoConsulta}</strong> ha sido aprobada.
       </p>
       
-      <div style="background-color: #f8f9fa; border-left: 4px solid #0a1e3a; padding: 20px; margin: 30px 0; border-radius: 4px;">
+      <div class="email-card" style="background-color: #f8f9fa; border-left: 4px solid #0a1e3a; padding: 20px; margin: 30px 0; border-radius: 4px;">
         <h3 style="color: #0a1e3a; margin: 0 0 15px 0; font-size: 18px; font-weight: 600;">
           📅 Detalles de la Consulta
         </h3>
         <table style="width: 100%; border-collapse: collapse;">
           <tr>
-            <td style="padding: 8px 0; font-weight: 600; color: #333; font-size: 14px; width: 120px;">Fecha y Hora:</td>
-            <td style="padding: 8px 0; color: #555; font-size: 14px;">${fecha}</td>
+            <td class="email-text" style="padding: 8px 0; font-weight: 600; color: #333333; font-size: 14px; width: 120px;">Fecha y Hora:</td>
+            <td class="email-text-secondary" style="padding: 8px 0; color: #555555; font-size: 14px;">${fecha}</td>
           </tr>
           <tr>
-            <td style="padding: 8px 0; font-weight: 600; color: #333; font-size: 14px;">Motivo:</td>
-            <td style="padding: 8px 0; color: #555; font-size: 14px;">${data.motivoConsulta}</td>
+            <td class="email-text" style="padding: 8px 0; font-weight: 600; color: #333333; font-size: 14px;">Motivo:</td>
+            <td class="email-text-secondary" style="padding: 8px 0; color: #555555; font-size: 14px;">${data.motivoConsulta}</td>
           </tr>
         </table>
       </div>
 
+      ${data.googleMeetLink ? `
       <div style="background: linear-gradient(135deg, #e8f4f8 0%, #d1e7dd 100%); border: 2px solid #0a1e3a; border-radius: 8px; padding: 30px; margin: 30px 0; text-align: center;">
         <h3 style="color: #0a1e3a; margin: 0 0 15px 0; font-size: 20px; font-weight: 600;">
           🎥 Unirse a la Videollamada
         </h3>
-        <p style="margin: 0 0 20px 0; font-size: 15px; color: #555; line-height: 1.6;">
+        <p class="email-text-secondary" style="margin: 0 0 20px 0; font-size: 15px; color: #555555; line-height: 1.6;">
           Puede unirse a la consulta mediante Google Meet en el siguiente enlace:
         </p>
-        <a href="${data.googleMeetLink}" style="display: inline-block; background-color: #0a1e3a; color: white; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; margin: 10px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: background-color 0.3s;">
+        <a href="${data.googleMeetLink || '#'}" style="display: inline-block; background-color: #0a1e3a; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; margin: 10px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
           Unirse a Google Meet
         </a>
-        <p style="margin: 20px 0 0 0; font-size: 13px; color: #666; line-height: 1.6;">
+        <p style="margin: 20px 0 0 0; font-size: 13px; color: #666666; line-height: 1.6;">
           O copie este enlace en su navegador:<br>
-          <span style="word-break: break-all; font-family: monospace; color: #0a1e3a;">${data.googleMeetLink}</span>
+          <span style="word-break: break-all; font-family: monospace; color: #0a1e3a;">${data.googleMeetLink || 'Pendiente'}</span>
         </p>
       </div>
+      ` : `
+      <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 20px; margin: 30px 0; border-radius: 4px;">
+        <p style="margin: 0; font-size: 15px; color: #856404; line-height: 1.6;">
+          <strong>📧 Enlace de Google Meet:</strong> Se le enviará el enlace de la videollamada próximamente. Por favor, esté atento a su correo electrónico.
+        </p>
+      </div>
+      `}
 
       <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 30px 0; border-radius: 4px;">
         <p style="margin: 0; font-size: 14px; color: #856404; line-height: 1.6;">
@@ -277,11 +505,11 @@ export async function sendAprobacionCitaEmail(
         </p>
       </div>
       
-      <p style="margin: 30px 0 0 0; font-size: 15px; color: #555; line-height: 1.6;">
+      <p class="email-text-secondary" style="margin: 30px 0 0 0; font-size: 15px; color: #555555; line-height: 1.6;">
         Si tiene alguna consulta o necesita cambiar la fecha/hora, por favor contáctenos con anticipación.
       </p>
       
-      <p style="margin: 30px 0 0 0; font-size: 15px; color: #333; line-height: 1.6;">
+      <p class="email-text" style="margin: 30px 0 0 0; font-size: 15px; color: #333333; line-height: 1.6;">
         Esperamos verle pronto.<br>
         Atentamente,<br>
         <strong style="color: #0a1e3a;">Abogado Elgueta</strong>
@@ -303,11 +531,16 @@ export async function sendAprobacionCitaEmail(
         Detalles de la Consulta:
         Fecha y Hora: ${fecha}
 
+        ${data.googleMeetLink ? `
         Unirse a la Videollamada:
         Puede unirse a la consulta mediante Google Meet en el siguiente enlace:
         ${data.googleMeetLink}
 
         Le recomendamos unirse unos minutos antes de la hora programada para verificar que todo funcione correctamente.
+        ` : `
+        Enlace de Google Meet:
+        Se le enviará el enlace de la videollamada próximamente. Por favor, esté atento a su correo electrónico.
+        `}
 
         Atentamente,
         Abogado Elgueta

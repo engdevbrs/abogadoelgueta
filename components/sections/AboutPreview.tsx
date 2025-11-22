@@ -8,13 +8,16 @@ export function AboutPreview() {
       <section id="quienes-somos" className="section-padding bg-white">
         <div className="section-container">
           <div className="grid gap-16 lg:grid-cols-2 items-center">
-            <div className="relative h-[400px] lg:h-[500px] rounded-lg overflow-hidden shadow-2xl group">
-              <Image
-                src="https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
-                alt="Profesional legal"
-                fill
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
-              />
+            <div className="flex justify-start lg:justify-start items-center">
+              <div className="relative w-[280px] h-[280px] lg:w-[490px] lg:h-[490px] rounded-lg overflow-hidden shadow-2xl group">
+                <Image
+                  src="/assets/images/adrian_profile.jpeg"
+                  alt="Adrián Elgueta - Abogado"
+                  fill
+                  className="object-cover object-top lg:object-center transition-transform duration-500 group-hover:scale-105"
+                  priority
+                />
+              </div>
             </div>
             <div className="space-y-8">
               <div>

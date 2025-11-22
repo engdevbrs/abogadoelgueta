@@ -27,13 +27,23 @@ const motivoConsultaOptions: { value: MotivoConsulta; label: string }[] = [
   { value: 'Otra Consulta Legal', label: 'Otra Consulta Legal' },
 ]
 
+// Schema con validación condicional
 const solicitudCitaSchema = z.object({
-  nombre: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
-  email: z.string().email('Email inválido'),
+  nombre: z.string({ required_error: 'El nombre es obligatorio' }).min(2, 'El nombre debe tener al menos 2 caracteres'),
+  email: z.string({ required_error: 'El email es obligatorio' }).email('Por favor, ingresa un email válido'),
   telefono: z.string().optional(),
-  motivoConsulta: z.string().min(1, 'Debes seleccionar un motivo de consulta'),
-  fechaHora: z.string().min(1, 'Debes seleccionar una fecha y hora para la consulta'),
+  motivoConsulta: z.string({ required_error: 'Debes seleccionar un motivo de consulta' }).min(1, 'Debes seleccionar un motivo de consulta'),
+  fechaHora: z.string().optional(),
   mensaje: z.string().optional(),
+}).refine((data) => {
+  // Solo validar fechaHora si hay motivoConsulta
+  if (data.motivoConsulta && !data.fechaHora) {
+    return false
+  }
+  return true
+}, {
+  message: 'Debes seleccionar una fecha y hora para la consulta',
+  path: ['fechaHora'],
 })
 
 type SolicitudCitaFormData = z.infer<typeof solicitudCitaSchema>
@@ -93,7 +103,7 @@ export function SolicitudCitaForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-lg text-left">
+    <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-6 max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-lg text-left">
       <div className="space-y-2">
         <Label htmlFor="nombre" className="text-gray-700 font-semibold block text-left">
           Nombre completo <span className="text-primary">*</span>
@@ -149,9 +159,13 @@ export function SolicitudCitaForm() {
           value={motivoConsulta || undefined}
           onValueChange={(value) => {
             setValue('motivoConsulta', value, { shouldValidate: true })
+            // Si se cambia el motivo, limpiar la fecha seleccionada
+            if (fechaHora) {
+              setValue('fechaHora', '', { shouldValidate: false })
+            }
           }}
         >
-          <SelectTrigger id="motivoConsulta" className="w-full text-gray-900 bg-white [&>span]:!text-gray-900">
+          <SelectTrigger id="motivoConsulta" className="w-full text-gray-900 bg-white [&>span]:!text-gray-900" aria-required="true">
             <SelectValue placeholder="Selecciona el motivo de tu consulta" />
           </SelectTrigger>
           <SelectContent className="z-[100] bg-white border-gray-200 shadow-lg">
@@ -163,19 +177,24 @@ export function SolicitudCitaForm() {
           </SelectContent>
         </Select>
         {errors.motivoConsulta && (
-          <p className="text-sm text-destructive">{errors.motivoConsulta.message}</p>
+          <p className="text-sm text-destructive mt-1">{errors.motivoConsulta.message}</p>
         )}
       </div>
 
-      <div className="space-y-2">
-        <DateTimePicker
-          value={fechaHora}
-          onChange={(value) => {
-            setValue('fechaHora', value || '', { shouldValidate: true })
-          }}
-          error={errors.fechaHora?.message}
-        />
-      </div>
+      {motivoConsulta && (
+        <div className="space-y-2 animate-fadeIn">
+          <DateTimePicker
+            value={fechaHora}
+            onChange={(value) => {
+              setValue('fechaHora', value || '', { shouldValidate: true })
+            }}
+            error={errors.fechaHora?.message}
+          />
+          {errors.fechaHora && !errors.fechaHora.message && (
+            <p className="text-sm text-destructive mt-1">Debes seleccionar una fecha y hora para la consulta</p>
+          )}
+        </div>
+      )}
 
       <div className="space-y-2">
         <Label htmlFor="mensaje" className="text-gray-700 font-semibold block text-left">

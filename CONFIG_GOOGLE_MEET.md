@@ -1,5 +1,16 @@
 # 🎥 Configuración de Google Meet - Abogado Elgueta
 
+## 📧 Cuenta de Google
+
+**Esta aplicación usa la cuenta de Google `adelguetap@gmail.com` para:**
+- Crear eventos en Google Calendar
+- Generar enlaces de Google Meet
+- Gestionar las videollamadas
+
+**Nota**: El correo de Resend (`adrianep@elguetabogado.cl`) es independiente y solo se usa para enviar emails.
+
+---
+
 ## ⚠️ Importante: Configuración Necesaria
 
 Para generar enlaces de Google Meet, necesitas **una de estas opciones**:
@@ -29,9 +40,12 @@ Entonces necesitas configurar Google Calendar API.
 
 ### Paso 1: Crear Proyecto en Google Cloud
 
+**⚠️ IMPORTANTE**: Usa la cuenta de Google `adelguetap@gmail.com` para todo este proceso.
+
 1. Ve a [Google Cloud Console](https://console.cloud.google.com)
-2. Crea un nuevo proyecto o selecciona uno existente
-3. Dale un nombre (ej: "Abogado Elgueta - Calendar API")
+2. **Inicia sesión con `adelguetap@gmail.com`** (esta será la cuenta que usará Google Calendar y Google Meet)
+3. Crea un nuevo proyecto o selecciona uno existente
+4. Dale un nombre (ej: "Abogado Elgueta - Calendar API")
 
 ### Paso 2: Habilitar Google Calendar API
 
@@ -57,8 +71,8 @@ Entonces necesitas configurar Google Calendar API.
 3. Si es la primera vez, configura la pantalla de consentimiento:
    - Tipo: **External**
    - Nombre de la app: "Abogado Elgueta"
-   - Email de soporte: tu email
-   - Agrega tu email como usuario de prueba
+   - Email de soporte: `adelguetap@gmail.com`
+   - Agrega `adelguetap@gmail.com` como usuario de prueba
 4. Tipo de aplicación: **Web application**
 5. Nombre: "Abogado Elgueta - Web Client"
 6. **Authorized redirect URIs**: 
@@ -97,7 +111,7 @@ OAuth Playground tiene su propio redirect URI. Necesitas agregarlo a tus credenc
 6. En el lado izquierdo, en **"Select & authorize APIs"**, busca "Google Calendar API v1" y selecciona:
    - ✅ `https://www.googleapis.com/auth/calendar`
 7. Haz clic en **"Authorize APIs"**
-8. Inicia sesión con tu cuenta de Google (la que usarás para las reuniones)
+8. **Inicia sesión con `adelguetap@gmail.com`** (esta es la cuenta que se usará para crear los eventos de Google Calendar y generar los enlaces de Google Meet)
 9. Revisa y acepta los permisos:
    - "Ver, editar, compartir y eliminar permanentemente todos los calendarios a los que tienes acceso"
 10. Haz clic en **"Allow"** (Permitir)
@@ -231,6 +245,19 @@ try {
 **Para empezar**: Usa el método simple (sin configuración). Funciona perfectamente.
 
 **Para producción**: Si quieres una experiencia más profesional, configura Google Calendar API para tener eventos automáticos en tu calendario.
+
+---
+
+## 📧 Cuenta de Google a Usar
+
+**IMPORTANTE**: Para esta aplicación, debes usar la cuenta de Google:
+- **Email**: `adelguetap@gmail.com`
+- Esta cuenta será la que:
+  - Cree los eventos en Google Calendar
+  - Genere los enlaces de Google Meet
+  - Reciba las invitaciones de calendario (si las configuras)
+
+**Nota**: El correo de Resend (`adrianep@elguetabogado.cl`) es independiente y solo se usa para enviar emails. No tiene relación con Google Calendar API.
 
 ---
 

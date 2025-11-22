@@ -1,0 +1,6 @@
+# Carpeta para imágenes de la aplicación
+
+# Uso en componentes Next.js:
+# import Image from 'next/image'
+# <Image src="/assets/images/nombre-imagen.jpg" alt="Descripción" width={500} height={300} />
+

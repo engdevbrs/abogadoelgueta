@@ -10,15 +10,15 @@ NEXTAUTH_URL="http://localhost:3000"
 NEXTAUTH_SECRET="cambiar-este-secreto-por-uno-seguro-generado-con-openssl-rand-base64-32"
 
 # Credenciales del administrador (para crear el usuario inicial)
-ADMIN_EMAIL="admin@abogadoelgueta.cl"
+ADMIN_EMAIL="adrianep@elguetabogado.cl"
 ADMIN_PASSWORD="admin123"
 ADMIN_NAME="Adrian Elgueta Pincheira"
 
 # Resend (Email) - Opcional por ahora
 # Obtén tu API key de https://resend.com
 RESEND_API_KEY=""
-FROM_EMAIL="noreply@abogadoelgueta.cl"
-ADMIN_EMAIL_NOTIFICATIONS="admin@abogadoelgueta.cl"
+FROM_EMAIL="adrianep@elguetabogado.cl"
+ADMIN_EMAIL_NOTIFICATIONS="adrianep@elguetabogado.cl"
 
 # Información bancaria (configurar después)
 BANCO_CUENTA="Banco de Chile"

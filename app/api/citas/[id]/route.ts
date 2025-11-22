@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { sendAprobacionCitaEmail } from '@/lib/email'
+import { sendAprobacionCitaEmail, sendPagoPendienteCitaEmail } from '@/lib/email'
 import { createGoogleMeetEvent } from '@/lib/google-calendar'
 import { z } from 'zod'
 
@@ -119,13 +119,14 @@ export async function PATCH(
           googleMeetLink = meetEvent.meetLink
           updateData.googleMeetLink = googleMeetLink
         } catch (error) {
-          console.error('Error generando Google Meet link con API:', error)
-          // Si falla, el administrador deberá agregar el enlace manualmente
-          // No generamos un enlace falso, mejor que lo agregue manualmente
+          console.error('Error creando evento de Google Meet:', error)
+          console.error('El administrador deberá agregar el enlace de Google Meet manualmente después de aprobar la cita.')
+          // Si falla, dejamos googleMeetLink como null/undefined
+          // El email se enviará sin link y el administrador puede agregarlo después
         }
       } else {
         console.warn('Google Calendar API no está configurado. El administrador debe agregar el enlace de Google Meet manualmente.')
-        // El administrador puede agregar el enlace manualmente a través del campo googleMeetLink
+        // No generamos link temporal, el administrador debe agregarlo manualmente
       }
     }
 
@@ -149,18 +150,35 @@ export async function PATCH(
       },
     })
 
-    // Si se aprobó la cita, enviar email de aprobación
-    if (validatedData.estado === 'APROBADA' && googleMeetLink) {
+    // Si se marca como Pago Pendiente, enviar email de recordatorio de pago
+    if (validatedData.estado === 'PAGO_PENDIENTE') {
       try {
+        await sendPagoPendienteCitaEmail(cita.email, {
+          nombre: cita.nombre,
+          motivoConsulta: cita.motivoConsulta,
+          fechaSolicitada: cita.fechaSolicitada,
+        })
+      } catch (emailError) {
+        console.error('Error enviando email de pago pendiente:', emailError)
+        // No fallar la request si el email falla, pero loguear el error
+      }
+    }
+
+    // Si se aprobó la cita, enviar email de aprobación
+    if (validatedData.estado === 'APROBADA') {
+      try {
+        // Enviar email siempre, con o sin link de Google Meet
+        // Si no hay link, el email se enviará sin la sección del link
+        // y el administrador puede agregarlo después y reenviar el email si es necesario
         await sendAprobacionCitaEmail(cita.email, {
           nombre: cita.nombre,
           motivoConsulta: cita.motivoConsulta,
-          googleMeetLink,
+          googleMeetLink: googleMeetLink || '', // Enviar string vacío si no hay link, el email lo manejará
           fechaSolicitada: cita.fechaSolicitada,
         })
       } catch (emailError) {
         console.error('Error enviando email de aprobación:', emailError)
-        // No fallar la request si el email falla
+        // No fallar la request si el email falla, pero loguear el error
       }
     }
 

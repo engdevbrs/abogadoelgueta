@@ -81,7 +81,7 @@ export default function LoginPage() {
                 id="email"
                 type="email"
                 {...register('email')}
-                placeholder="admin@ejemplo.com"
+                placeholder="adrianep@elguetabogado.cl"
               />
               {errors.email && (
                 <p className="text-sm text-destructive">{errors.email.message}</p>

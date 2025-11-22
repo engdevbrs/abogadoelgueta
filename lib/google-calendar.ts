@@ -13,6 +13,17 @@ if (process.env.GOOGLE_ACCESS_TOKEN && process.env.GOOGLE_REFRESH_TOKEN) {
     access_token: process.env.GOOGLE_ACCESS_TOKEN,
     refresh_token: process.env.GOOGLE_REFRESH_TOKEN,
   })
+  
+  // Configurar refresh automático de tokens
+  auth.on('tokens', (tokens) => {
+    if (tokens.refresh_token) {
+      // Si Google devuelve un nuevo refresh_token, guardarlo
+      console.log('Nuevo refresh_token recibido (deberías actualizar .env si es necesario)')
+    }
+    if (tokens.access_token) {
+      console.log('Access token actualizado automáticamente')
+    }
+  })
 }
 
 /**
@@ -27,6 +38,14 @@ export async function createGoogleMeetEvent(data: {
   attendeeName?: string
 }) {
   try {
+    // Verificar que los tokens estén configurados
+    if (!process.env.GOOGLE_ACCESS_TOKEN || !process.env.GOOGLE_REFRESH_TOKEN) {
+      throw new Error('Google Calendar API no está configurado. Faltan tokens de acceso.')
+    }
+
+    // Asegurar que los tokens estén actualizados
+    await auth.refreshAccessToken()
+
     const calendar = google.calendar({ version: 'v3', auth })
 
     // Crear el evento con Google Meet
@@ -59,25 +78,43 @@ export async function createGoogleMeetEvent(data: {
         : undefined,
     }
 
+    console.log('Creando evento en Google Calendar...')
+    console.log('Calendario: primary')
+    console.log('Inicio:', data.startTime.toISOString())
+    console.log('Fin:', data.endTime.toISOString())
+
     const response = await calendar.events.insert({
       calendarId: 'primary',
       conferenceDataVersion: 1,
       requestBody: event,
     })
 
+    console.log('Evento creado exitosamente en Google Calendar')
+    console.log('Event ID:', response.data.id)
+    console.log('HTML Link:', response.data.htmlLink)
+
     const meetLink = response.data.conferenceData?.entryPoints?.[0]?.uri
 
     if (!meetLink) {
+      console.warn('No se pudo obtener el link de Google Meet del evento')
+      console.warn('Response data:', JSON.stringify(response.data, null, 2))
       throw new Error('No se pudo generar el link de Google Meet')
     }
+
+    console.log('Google Meet link generado:', meetLink)
 
     return {
       eventId: response.data.id,
       meetLink: meetLink,
       htmlLink: response.data.htmlLink,
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creando evento de Google Meet:', error)
+    if (error.response) {
+      console.error('Error response:', error.response.data)
+      console.error('Error status:', error.response.status)
+      console.error('Error headers:', error.response.headers)
+    }
     throw error
   }
 }

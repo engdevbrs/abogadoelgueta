@@ -34,7 +34,7 @@ ADMIN_NAME="Administrador"
 
 # Emails (opcional por ahora)
 RESEND_API_KEY=""
-FROM_EMAIL="noreply@abogadoelgueta.cl"
+FROM_EMAIL="adrianep@elguetabogado.cl"
 
 # Banco (configura después)
 BANCO_CUENTA="Pendiente"

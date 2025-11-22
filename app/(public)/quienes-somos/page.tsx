@@ -40,13 +40,16 @@ export default function QuienesSomosPage() {
       <section className="section-padding bg-white">
         <div className="section-container space-y-16">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="relative h-[400px] lg:h-[500px] rounded-lg overflow-hidden shadow-2xl group order-2 lg:order-1">
-              <Image
-                src="https://images.unsplash.com/photo-1589829545856-d10d557cf95f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
-                alt="Estudio legal profesional"
-                fill
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
-              />
+            <div className="flex justify-start lg:justify-start items-center order-2 lg:order-1">
+              <div className="relative w-[280px] h-[280px] lg:w-[490px] lg:h-[490px] rounded-lg overflow-hidden shadow-2xl group">
+                <Image
+                  src="/assets/images/adrian_profile.jpeg"
+                  alt="Adrián Elgueta - Abogado"
+                  fill
+                  className="object-cover object-top lg:object-center transition-transform duration-500 group-hover:scale-105"
+                  priority
+                />
+              </div>
             </div>
             <div className="space-y-6 order-1 lg:order-2">
               <p className="text-lg md:text-xl text-gray-700 leading-relaxed font-light">

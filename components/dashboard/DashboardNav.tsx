@@ -28,7 +28,7 @@ export function DashboardNav() {
           <div className="flex items-center flex-shrink-0">
             <Link href="/dashboard" className="flex items-center space-x-2 sm:space-x-3">
               <span className="text-lg sm:text-xl font-semibold whitespace-nowrap tracking-tight">
-                Abogado Elgueta
+                Abogado Adrián Elgueta
               </span>
               <span className="text-xs sm:text-sm opacity-75 hidden sm:inline font-normal">Admin</span>
             </Link>
@@ -60,7 +60,7 @@ export function DashboardNav() {
               variant="ghost"
               size="sm"
               onClick={handleSignOut}
-              className="text-secondary hover:bg-secondary/10"
+              className="text-secondary/80 hover:text-secondary hover:bg-secondary/15 transition-all duration-200 hover:scale-105 active:scale-100"
             >
               <LogOut className="h-4 w-4 mr-2" />
               <span className="hidden lg:inline">Cerrar Sesión</span>
@@ -74,7 +74,7 @@ export function DashboardNav() {
               variant="ghost"
               size="sm"
               onClick={handleSignOut}
-              className="text-secondary hover:bg-secondary/10 p-2"
+              className="text-secondary/80 hover:text-secondary hover:bg-secondary/15 transition-all duration-200 hover:scale-105 active:scale-100 p-2"
               aria-label="Cerrar sesión"
             >
               <LogOut className="h-5 w-5" />
@@ -125,7 +125,7 @@ export function DashboardNav() {
                 handleSignOut()
                 setMobileMenuOpen(false)
               }}
-              className="flex items-center space-x-3 px-3 py-2 rounded-md text-base font-medium text-secondary/80 hover:bg-secondary/10 hover:text-secondary w-full text-left"
+              className="flex items-center space-x-3 px-3 py-2 rounded-md text-base font-medium text-secondary/80 hover:bg-secondary/15 hover:text-secondary transition-all duration-200 w-full text-left"
             >
               <LogOut className="h-5 w-5" />
               <span>Cerrar Sesión</span>

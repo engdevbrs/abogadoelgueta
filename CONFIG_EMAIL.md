@@ -20,9 +20,9 @@ Para producción, necesitas verificar tu propio dominio:
 
 1. Ve a [Domains](https://resend.com/domains) en Resend
 2. Haz clic en "Add Domain"
-3. Ingresa tu dominio (ej: `abogadoelgueta.cl`)
+3. Ingresa tu dominio (ej: `elguetabogado.cl`)
 4. Resend te dará registros DNS para agregar a tu proveedor de dominio
-5. Una vez verificado, podrás usar emails como `noreply@abogadoelgueta.cl`
+5. Una vez verificado, podrás usar emails como `adrianep@elguetabogado.cl`
 
 **Nota**: En desarrollo puedes usar el dominio de prueba de Resend (limitado).
 
@@ -33,8 +33,8 @@ Agrega estas variables a tu archivo `.env`:
 ```env
 # Resend (Emails)
 RESEND_API_KEY="re_xxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-FROM_EMAIL="noreply@abogadoelgueta.cl"  # Debe ser un email verificado en Resend
-ADMIN_EMAIL="admin@abogadoelgueta.cl"    # Email del administrador
+FROM_EMAIL="adrianep@elguetabogado.cl"  # Debe ser un email verificado en Resend
+ADMIN_EMAIL="adrianep@elguetabogado.cl"    # Email del administrador
 
 # Información Bancaria (se mostrará en los emails)
 BANCO_CUENTA="Banco de Chile"

@@ -103,7 +103,7 @@ export default function ContactoPage() {
                     </div>
                     <div>
                       <h3 className="font-semibold text-lg mb-1">Email</h3>
-                      <p className="text-gray-600">contacto@abogadoelgueta.cl</p>
+                      <p className="text-gray-600">adrianep@elguetabogado.cl</p>
                       <p className="text-sm text-gray-500 mt-1">(Pendiente de configurar)</p>
                     </div>
                   </div>
