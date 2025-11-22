@@ -1,29 +1,39 @@
 # Base de datos
-# Para desarrollo local con SQLite (más fácil de configurar)
-DATABASE_URL="file:./dev.db"
+# Para producción en Vercel, usar PostgreSQL (Vercel Postgres o externo)
+# Formato: postgresql://usuario:password@host:5432/database?schema=public
+DATABASE_URL="postgresql://usuario:password@host:5432/database?schema=public"
 
-# Para producción o desarrollo con PostgreSQL, usar:
-# DATABASE_URL="postgresql://usuario:password@localhost:5432/abogado_elgueta?schema=public"
+# Para desarrollo local con SQLite (opcional), cambiar provider en prisma/schema.prisma a "sqlite"
+# DATABASE_URL="file:./dev.db"
 
 # NextAuth
+# En producción (Vercel), usar: https://tu-dominio.vercel.app
+# En desarrollo local: http://localhost:3000
 NEXTAUTH_URL="http://localhost:3000"
 NEXTAUTH_SECRET="cambiar-este-secreto-por-uno-seguro-generado-con-openssl-rand-base64-32"
+
+# URL de la aplicación (usado en emails para enlaces al dashboard)
+# En producción: https://tu-dominio.vercel.app
+# En desarrollo: http://localhost:3000
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
 
 # Credenciales del administrador (para crear el usuario inicial)
 ADMIN_EMAIL="adrianep@elguetabogado.cl"
 ADMIN_PASSWORD="admin123"
 ADMIN_NAME="Adrian Elgueta Pincheira"
 
-# Resend (Email) - Opcional por ahora
+# Resend (Email) - REQUERIDO para producción
 # Obtén tu API key de https://resend.com
 RESEND_API_KEY=""
 FROM_EMAIL="adrianep@elguetabogado.cl"
-ADMIN_EMAIL_NOTIFICATIONS="adrianep@elguetabogado.cl"
+ADMIN_EMAIL="adrianep@elguetabogado.cl"
 
 # Información bancaria (configurar después)
 BANCO_CUENTA="Banco de Chile"
 BANCO_TIPO="Cuenta Corriente"
 BANCO_NUMERO="1234567890"
+BANCO_RUT=""
+BANCO_NOMBRE_TITULAR="Abogado Elgueta"
 
 # Google Calendar API (Opcional - para Google Meet links automáticos)
 # Si no configuras esto, el sistema generará links simples de Google Meet

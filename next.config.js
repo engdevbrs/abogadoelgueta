@@ -12,6 +12,12 @@ const nextConfig = {
       },
     ],
   },
+  // Asegurar que Prisma se genera en el build
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '2mb',
+    },
+  },
 }
 
 module.exports = nextConfig

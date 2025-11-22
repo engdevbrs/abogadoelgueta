@@ -73,10 +73,10 @@ function getEmailTemplate(content: string): string {
       </style>
     </head>
     <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f4f4f4; line-height: 1.6; color: #333333;">
-      <table role="presentation" class="email-container" style="width: 100%; border-collapse: collapse; background-color: #f4f4f4; padding: 20px 0;">
+      <table role="presentation" class="email-container" style="width: 100%; border-collapse: collapse; background-color: #f4f4f4; padding: 60px 20px;">
         <tr>
-          <td align="center">
-            <table role="presentation" class="email-content" style="width: 100%; max-width: 600px; background-color: #ffffff; border-collapse: collapse; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+          <td align="center" style="padding: 0;">
+            <table role="presentation" class="email-content" style="width: 100%; max-width: 600px; background-color: #ffffff; border-collapse: collapse; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin: 0 auto;">
               <!-- Header -->
               <tr>
                 <td style="background: linear-gradient(135deg, #0a1e3a 0%, #1a3a5a 100%); padding: 30px 20px; text-align: center;">
@@ -128,6 +128,30 @@ interface AprobacionCitaData {
   motivoConsulta: string
   googleMeetLink?: string
   fechaSolicitada?: Date | null
+}
+
+interface NotificacionNuevaCitaData {
+  nombre: string
+  email: string
+  telefono?: string | null
+  motivoConsulta: string
+  mensaje?: string | null
+  fechaSolicitada?: Date | null
+  citaId: string
+}
+
+interface NotificacionContactoData {
+  nombre: string
+  email: string
+  telefono?: string | null
+  asunto: string
+  mensaje: string
+  contactoId: string
+}
+
+interface ConfirmacionContactoData {
+  nombre: string
+  asunto: string
 }
 
 /**
@@ -555,6 +579,343 @@ export async function sendAprobacionCitaEmail(
     return emailData
   } catch (error) {
     console.error('Error en sendAprobacionCitaEmail:', error)
+    throw error
+  }
+}
+
+/**
+ * Envía email de notificación al administrador cuando se recibe una nueva solicitud de cita
+ */
+export async function sendNotificacionNuevaCitaEmail(
+  data: NotificacionNuevaCitaData
+) {
+  if (!resend) {
+    console.warn('Resend no está configurado. Email no enviado.')
+    return null
+  }
+
+  try {
+    const fecha = data.fechaSolicitada 
+      ? new Intl.DateTimeFormat('es-CL', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        }).format(new Date(data.fechaSolicitada))
+      : 'No especificada'
+
+    const htmlContent = `
+      <div style="text-align: center; margin-bottom: 30px;">
+        <div style="background: linear-gradient(135deg, #0a1e3a 0%, #1a3a5a 100%); color: white; padding: 15px; border-radius: 8px; display: inline-block;">
+          <p style="margin: 0; font-size: 18px; font-weight: 600;">🔔 Nueva Solicitud de Consulta</p>
+        </div>
+      </div>
+      
+      <h2 style="color: #0a1e3a; margin: 0 0 20px 0; font-size: 24px; font-weight: 600;" class="email-text">
+        Has recibido una nueva solicitud de consulta
+      </h2>
+      
+      <p style="margin: 0 0 30px 0; font-size: 16px;" class="email-text-secondary">
+        Se ha recibido una nueva solicitud de consulta legal que requiere tu revisión.
+      </p>
+      
+      <div class="email-card">
+        <h3 style="color: #0a1e3a; margin: 0 0 15px 0; font-size: 18px; font-weight: 600;" class="email-text">
+          👤 Información del Cliente
+        </h3>
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr>
+            <td style="padding: 8px 0; font-weight: 600; font-size: 14px; width: 140px;" class="email-text">Nombre:</td>
+            <td style="padding: 8px 0; font-size: 14px;" class="email-text-secondary">${data.nombre}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; font-weight: 600; font-size: 14px;" class="email-text">Email:</td>
+            <td style="padding: 8px 0; font-size: 14px;" class="email-text-secondary">${data.email}</td>
+          </tr>
+          ${data.telefono ? `
+          <tr>
+            <td style="padding: 8px 0; font-weight: 600; font-size: 14px;" class="email-text">Teléfono:</td>
+            <td style="padding: 8px 0; font-size: 14px;" class="email-text-secondary">${data.telefono}</td>
+          </tr>
+          ` : ''}
+        </table>
+      </div>
+
+      <div class="email-card">
+        <h3 style="color: #0a1e3a; margin: 0 0 15px 0; font-size: 18px; font-weight: 600;" class="email-text">
+          📋 Detalles de la Consulta
+        </h3>
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr>
+            <td style="padding: 8px 0; font-weight: 600; font-size: 14px; width: 140px;" class="email-text">Motivo:</td>
+            <td style="padding: 8px 0; font-size: 14px;" class="email-text-secondary">${data.motivoConsulta}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; font-weight: 600; font-size: 14px;" class="email-text">Fecha Solicitada:</td>
+            <td style="padding: 8px 0; font-size: 14px;" class="email-text-secondary">${fecha}</td>
+          </tr>
+          ${data.mensaje ? `
+          <tr>
+            <td style="padding: 8px 0; font-weight: 600; font-size: 14px; vertical-align: top;" class="email-text">Mensaje:</td>
+            <td style="padding: 8px 0; font-size: 14px;" class="email-text-secondary">${data.mensaje}</td>
+          </tr>
+          ` : ''}
+        </table>
+      </div>
+
+      <div style="background-color: #e8f4f8; border: 1px solid #0a1e3a; border-radius: 6px; padding: 20px; margin: 30px 0; text-align: center;" class="email-card">
+        <p style="margin: 0 0 12px 0; font-size: 15px; color: #0a1e3a; font-weight: 600;" class="email-text">
+          ⚡ Acción Requerida
+        </p>
+        <p style="margin: 0; font-size: 14px;" class="email-text-secondary">
+          Por favor, revisa la solicitud en el dashboard y valida el pago para poder aprobar la consulta.
+        </p>
+      </div>
+
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard" class="email-button">
+          Ver Solicitud en el Dashboard
+        </a>
+      </div>
+      
+      <p style="margin: 30px 0 0 0; font-size: 15px;" class="email-text-secondary">
+        ID de la solicitud: <span style="font-family: monospace; color: #0a1e3a;" class="email-text">${data.citaId}</span>
+      </p>
+    `
+
+    const { data: emailData, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: [ADMIN_EMAIL],
+      subject: `🔔 Nueva Solicitud de Consulta - ${data.nombre}`,
+      html: getEmailTemplate(htmlContent),
+      text: `
+        Nueva Solicitud de Consulta - Abogado Elgueta
+
+        Has recibido una nueva solicitud de consulta legal que requiere tu revisión.
+
+        Información del Cliente:
+        Nombre: ${data.nombre}
+        Email: ${data.email}
+        ${data.telefono ? `Teléfono: ${data.telefono}` : ''}
+
+        Detalles de la Consulta:
+        Motivo: ${data.motivoConsulta}
+        Fecha Solicitada: ${fecha}
+        ${data.mensaje ? `Mensaje: ${data.mensaje}` : ''}
+
+        Acción Requerida:
+        Por favor, revisa la solicitud en el dashboard y valida el pago para poder aprobar la consulta.
+
+        ID de la solicitud: ${data.citaId}
+
+        Ver solicitud en el dashboard: ${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard
+      `,
+    })
+
+    if (error) {
+      console.error('Error enviando email:', error)
+      throw error
+    }
+
+    return emailData
+  } catch (error) {
+    console.error('Error en sendNotificacionNuevaCitaEmail:', error)
+    throw error
+  }
+}
+
+/**
+ * Envía email de notificación al administrador cuando se recibe un mensaje de contacto
+ */
+export async function sendNotificacionContactoEmail(
+  data: NotificacionContactoData
+) {
+  if (!resend) {
+    console.warn('Resend no está configurado. Email no enviado.')
+    return null
+  }
+
+  try {
+    const htmlContent = `
+      <div style="text-align: center; margin-bottom: 30px;">
+        <div style="background: linear-gradient(135deg, #0a1e3a 0%, #1a3a5a 100%); color: white; padding: 15px; border-radius: 8px; display: inline-block;">
+          <p style="margin: 0; font-size: 18px; font-weight: 600;">📧 Nuevo Mensaje de Contacto</p>
+        </div>
+      </div>
+      
+      <h2 style="color: #0a1e3a; margin: 0 0 20px 0; font-size: 24px; font-weight: 600;" class="email-text">
+        Has recibido un nuevo mensaje
+      </h2>
+      
+      <p style="margin: 0 0 30px 0; font-size: 16px;" class="email-text-secondary">
+        Se ha recibido un nuevo mensaje a través del formulario de contacto en tu sitio web.
+      </p>
+      
+      <div class="email-card">
+        <h3 style="color: #0a1e3a; margin: 0 0 15px 0; font-size: 18px; font-weight: 600;" class="email-text">
+          👤 Información del Contacto
+        </h3>
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr>
+            <td style="padding: 8px 0; font-weight: 600; font-size: 14px; width: 140px;" class="email-text">Nombre:</td>
+            <td style="padding: 8px 0; font-size: 14px;" class="email-text-secondary">${data.nombre}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; font-weight: 600; font-size: 14px;" class="email-text">Email:</td>
+            <td style="padding: 8px 0; font-size: 14px;" class="email-text-secondary">${data.email}</td>
+          </tr>
+          ${data.telefono ? `
+          <tr>
+            <td style="padding: 8px 0; font-weight: 600; font-size: 14px;" class="email-text">Teléfono:</td>
+            <td style="padding: 8px 0; font-size: 14px;" class="email-text-secondary">${data.telefono}</td>
+          </tr>
+          ` : ''}
+        </table>
+      </div>
+
+      <div class="email-card">
+        <h3 style="color: #0a1e3a; margin: 0 0 15px 0; font-size: 18px; font-weight: 600;" class="email-text">
+          📝 Detalles del Mensaje
+        </h3>
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr>
+            <td style="padding: 8px 0; font-weight: 600; font-size: 14px; width: 140px;" class="email-text">Asunto:</td>
+            <td style="padding: 8px 0; font-size: 14px;" class="email-text-secondary">${data.asunto}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; font-weight: 600; font-size: 14px; vertical-align: top;" class="email-text">Mensaje:</td>
+            <td style="padding: 8px 0; font-size: 14px; white-space: pre-wrap;" class="email-text-secondary">${data.mensaje}</td>
+          </tr>
+        </table>
+      </div>
+
+      <div style="background-color: #e8f4f8; border: 1px solid #0a1e3a; border-radius: 6px; padding: 20px; margin: 30px 0; text-align: center;" class="email-card">
+        <p style="margin: 0; font-size: 14px;" class="email-text-secondary">
+          Puedes responder directamente a este correo respondiendo a: <strong style="color: #0a1e3a;" class="email-text">${data.email}</strong>
+        </p>
+      </div>
+      
+      <p style="margin: 30px 0 0 0; font-size: 15px;" class="email-text-secondary">
+        ID del mensaje: <span style="font-family: monospace; color: #0a1e3a;" class="email-text">${data.contactoId}</span>
+      </p>
+    `
+
+    const { data: emailData, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: [ADMIN_EMAIL],
+      reply_to: data.email, // Permite responder directamente al usuario
+      subject: `📧 Nuevo Mensaje de Contacto - ${data.asunto}`,
+      html: getEmailTemplate(htmlContent),
+      text: `
+        Nuevo Mensaje de Contacto - Abogado Elgueta
+
+        Has recibido un nuevo mensaje a través del formulario de contacto en tu sitio web.
+
+        Información del Contacto:
+        Nombre: ${data.nombre}
+        Email: ${data.email}
+        ${data.telefono ? `Teléfono: ${data.telefono}` : ''}
+
+        Detalles del Mensaje:
+        Asunto: ${data.asunto}
+        Mensaje: ${data.mensaje}
+
+        Puedes responder directamente a este correo respondiendo a: ${data.email}
+
+        ID del mensaje: ${data.contactoId}
+      `,
+    })
+
+    if (error) {
+      console.error('Error enviando email:', error)
+      throw error
+    }
+
+    return emailData
+  } catch (error) {
+    console.error('Error en sendNotificacionContactoEmail:', error)
+    throw error
+  }
+}
+
+/**
+ * Envía email de confirmación al usuario cuando se recibe su mensaje de contacto
+ */
+export async function sendConfirmacionContactoEmail(
+  to: string,
+  data: ConfirmacionContactoData
+) {
+  if (!resend) {
+    console.warn('Resend no está configurado. Email no enviado.')
+    return null
+  }
+
+  try {
+    const htmlContent = `
+      <h2 style="color: #0a1e3a; margin: 0 0 20px 0; font-size: 24px; font-weight: 600;" class="email-text">
+        Confirmación de Mensaje Recibido
+      </h2>
+      
+      <p style="margin: 0 0 16px 0; font-size: 16px;" class="email-text">
+        Estimado/a <strong style="color: #0a1e3a;" class="email-text">${data.nombre}</strong>,
+      </p>
+      
+      <p style="margin: 0 0 20px 0; font-size: 16px;" class="email-text-secondary">
+        Hemos recibido tu mensaje sobre: <strong style="color: #0a1e3a;" class="email-text">${data.asunto}</strong>
+      </p>
+      
+      <p style="margin: 0 0 30px 0; font-size: 16px;" class="email-text-secondary">
+        Te responderemos lo antes posible. Por favor, mantente atento a tu correo electrónico.
+      </p>
+      
+      <div style="background-color: #e8f4f8; border: 1px solid #0a1e3a; border-radius: 6px; padding: 20px; margin: 30px 0; text-align: center;" class="email-card">
+        <p style="margin: 0; font-size: 14px;" class="email-text-secondary">
+          💡 Si tienes alguna consulta urgente, no dudes en contactarnos directamente por teléfono.
+        </p>
+      </div>
+      
+      <p style="margin: 30px 0 0 0; font-size: 15px;" class="email-text-secondary">
+        Gracias por contactarnos.
+      </p>
+      
+      <p style="margin: 30px 0 0 0; font-size: 15px;" class="email-text">
+        Atentamente,<br>
+        <strong style="color: #0a1e3a;" class="email-text">Abogado Elgueta</strong>
+      </p>
+    `
+
+    const { data: emailData, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: [to],
+      subject: `Confirmación de Mensaje Recibido - ${data.asunto}`,
+      html: getEmailTemplate(htmlContent),
+      text: `
+        Confirmación de Mensaje Recibido - Abogado Elgueta
+
+        Estimado/a ${data.nombre},
+
+        Hemos recibido tu mensaje sobre: ${data.asunto}
+
+        Te responderemos lo antes posible. Por favor, mantente atento a tu correo electrónico.
+
+        Si tienes alguna consulta urgente, no dudes en contactarnos directamente por teléfono.
+
+        Gracias por contactarnos.
+
+        Atentamente,
+        Abogado Elgueta
+      `,
+    })
+
+    if (error) {
+      console.error('Error enviando email:', error)
+      throw error
+    }
+
+    return emailData
+  } catch (error) {
+    console.error('Error en sendConfirmacionContactoEmail:', error)
     throw error
   }
 }

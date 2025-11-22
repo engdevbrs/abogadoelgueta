@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { sendNotificacionContactoEmail, sendConfirmacionContactoEmail } from '@/lib/email'
 import { z } from 'zod'
 
 const contactoSchema = z.object({
@@ -28,8 +29,31 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    // TODO: Enviar email de notificación al administrador
-    // TODO: Enviar email de confirmación al usuario
+    // Enviar email de confirmación al usuario
+    try {
+      await sendConfirmacionContactoEmail(contacto.email, {
+        nombre: contacto.nombre,
+        asunto: contacto.asunto,
+      })
+    } catch (emailError) {
+      console.error('Error enviando email de confirmación:', emailError)
+      // No fallar la request si el email falla, pero loguear el error
+    }
+
+    // Enviar email de notificación al administrador
+    try {
+      await sendNotificacionContactoEmail({
+        nombre: contacto.nombre,
+        email: contacto.email,
+        telefono: contacto.telefono,
+        asunto: contacto.asunto,
+        mensaje: contacto.mensaje,
+        contactoId: contacto.id,
+      })
+    } catch (emailError) {
+      console.error('Error enviando email de notificación al administrador:', emailError)
+      // No fallar la request si el email falla, pero loguear el error
+    }
 
     return NextResponse.json(
       { 
