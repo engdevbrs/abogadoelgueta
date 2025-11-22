@@ -69,7 +69,7 @@ export async function GET(request: NextRequest) {
     const fechasLaborables = obtenerFechasLaborables()
     
     // Obtener citas aprobadas para verificar disponibilidad
-    let citasAprobadas = []
+    let citasAprobadas: Array<{ fechaSolicitada: Date | null }> = []
     try {
       citasAprobadas = await prisma.cita.findMany({
         where: {
