@@ -73,6 +73,28 @@ export async function createGoogleMeetEvent(data: {
 
     const calendar = google.calendar({ version: 'v3', auth })
 
+    // Preparar lista de asistentes
+    const googleCalendarEmail = process.env.GOOGLE_CALENDAR_EMAIL || 'adelguetap@gmail.com'
+    const attendees = []
+    
+    // Agregar el cliente si hay email
+    if (data.attendeeEmail) {
+      attendees.push({
+        email: data.attendeeEmail,
+        displayName: data.attendeeName || 'Cliente',
+      })
+    }
+    
+    // Agregar el email de Google Calendar como asistente
+    // Importante: aunque el evento se crea en el calendario de adelguetap@gmail.com,
+    // también debe estar en la lista de asistentes para recibir notificaciones
+    attendees.push({
+      email: googleCalendarEmail,
+      displayName: 'Abogado Adrián Elgueta',
+    })
+
+    console.log('Asistentes del evento:', attendees.map(a => `${a.displayName} (${a.email})`).join(', '))
+
     // Crear el evento con Google Meet
     const event = {
       summary: data.summary,
@@ -93,38 +115,26 @@ export async function createGoogleMeetEvent(data: {
           },
         },
       },
-      attendees: [
-        ...(data.attendeeEmail
-          ? [
-              {
-                email: data.attendeeEmail,
-                displayName: data.attendeeName,
-              },
-            ]
-          : []),
-        // Agregar el email de Google Calendar como asistente
-        {
-          email: process.env.GOOGLE_CALENDAR_EMAIL || 'adelguetap@gmail.com',
-          displayName: 'Abogado Adrián Elgueta',
-          organizer: false,
-        },
-      ],
+      attendees: attendees.length > 0 ? attendees : undefined,
     }
 
     console.log('Creando evento en Google Calendar...')
     console.log('Calendario: primary')
     console.log('Inicio:', data.startTime.toISOString())
     console.log('Fin:', data.endTime.toISOString())
+    console.log('Asistentes:', JSON.stringify(attendees, null, 2))
 
     const response = await calendar.events.insert({
       calendarId: 'primary',
       conferenceDataVersion: 1,
       requestBody: event,
+      sendUpdates: 'all', // Enviar invitaciones a todos los asistentes
     })
 
     console.log('Evento creado exitosamente en Google Calendar')
     console.log('Event ID:', response.data.id)
     console.log('HTML Link:', response.data.htmlLink)
+    console.log('Asistentes en la respuesta:', JSON.stringify(response.data.attendees, null, 2))
 
     const meetLink = response.data.conferenceData?.entryPoints?.[0]?.uri
 

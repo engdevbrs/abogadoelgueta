@@ -56,17 +56,17 @@ function getEmailTemplate(content: string): string {
           .email-card {
             background-color: #3a3a3a !important;
           }
-          /* Header - mantener colores brillantes en modo oscuro */
+          /* Header - colores neutros compatibles con ambos modos */
           .email-header {
-            background: linear-gradient(135deg, #1a3a5a 0%, #2a5a7a 100%) !important;
+            background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%) !important;
           }
           .email-header h1 {
             color: #ffffff !important;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.3) !important;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2) !important;
           }
           .email-header p {
-            color: #f0f0f0 !important;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.3) !important;
+            color: #e2e8f0 !important;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2) !important;
           }
           /* Footer - mantener colores brillantes */
           .email-footer {
@@ -75,19 +75,19 @@ function getEmailTemplate(content: string): string {
           .email-footer p {
             color: #ffffff !important;
           }
-          /* Sección de videollamada - mejor contraste */
+          /* Sección de videollamada - colores neutros para modo oscuro */
           .email-videocall-section {
-            background: linear-gradient(135deg, #2a4a6a 0%, #3a5a8a 100%) !important;
-            border: 2px solid #4a7a9a !important;
+            background: linear-gradient(135deg, #3a4655 0%, #2d3748 100%) !important;
+            border: 2px solid #4a5568 !important;
           }
           .email-videocall-section h3 {
             color: #ffffff !important;
           }
           .email-videocall-section p {
-            color: #f0f0f0 !important;
+            color: #e2e8f0 !important;
           }
           .email-videocall-link {
-            color: #e0f0ff !important;
+            color: #cbd5e0 !important;
           }
           /* Botones - mantener visibilidad */
           .email-button {
@@ -132,11 +132,11 @@ function getEmailTemplate(content: string): string {
             <table role="presentation" class="email-content" style="width: 100%; max-width: 600px; background-color: #ffffff; border-collapse: collapse; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin: 0 auto;">
               <!-- Header -->
               <tr>
-                <td class="email-header" style="background: linear-gradient(135deg, #0a1e3a 0%, #1a3a5a 100%); padding: 30px 20px; text-align: center;">
-                  <h1 class="email-header" style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700; letter-spacing: 0.5px; text-shadow: 0 1px 3px rgba(0,0,0,0.2);">
+                <td class="email-header" style="background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%); padding: 30px 20px; text-align: center;"></td>
+                  <h1 class="email-header" style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700; letter-spacing: 0.5px; text-shadow: 0 1px 2px rgba(0,0,0,0.2);">
                     Abogado Elgueta
                   </h1>
-                  <p class="email-header" style="margin: 8px 0 0 0; color: #f0f0f0; font-size: 14px; font-weight: 300; text-shadow: 0 1px 2px rgba(0,0,0,0.2);">
+                  <p class="email-header" style="margin: 8px 0 0 0; color: #e2e8f0; font-size: 14px; font-weight: 300; text-shadow: 0 1px 2px rgba(0,0,0,0.2);">
                     Asesoría Legal Profesional
                   </p>
                 </td>
@@ -553,19 +553,20 @@ export async function sendAprobacionCitaEmail(
       </div>
 
       ${data.googleMeetLink ? `
-      <div class="email-videocall-section" style="background: linear-gradient(135deg, #e8f4f8 0%, #d1e7dd 100%); border: 2px solid #0a1e3a; border-radius: 8px; padding: 30px; margin: 30px 0; text-align: center;">
-        <h3 class="email-videocall-section" style="color: #0a1e3a; margin: 0 0 15px 0; font-size: 20px; font-weight: 600;">
+      <!-- Videollamada -->
+      <div class="email-videocall-section" style="background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%); border: 2px solid #4a5568; border-radius: 8px; padding: 30px; margin: 30px 0; text-align: center;">
+        <h3 class="email-videocall-section" style="color: #2d3748; margin: 0 0 15px 0; font-size: 20px; font-weight: 600;">
           🎥 Unirse a la Videollamada
         </h3>
-        <p class="email-text-secondary email-videocall-section" style="margin: 0 0 20px 0; font-size: 15px; color: #555555; line-height: 1.6;">
+        <p class="email-text-secondary email-videocall-section" style="margin: 0 0 20px 0; font-size: 15px; color: #4a5568; line-height: 1.6;">
           Puede unirse a la consulta mediante Google Meet en el siguiente enlace:
         </p>
-        <a href="${data.googleMeetLink || '#'}" class="email-button" style="display: inline-block; background-color: #0a1e3a; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; margin: 10px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.2); border: 1px solid #1a3a5a;">
+        <a href="${data.googleMeetLink || '#'}" class="email-button" style="display: inline-block; background-color: #4a5568; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; margin: 10px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.2); border: 1px solid #2d3748;">
           Unirse a Google Meet
         </a>
-        <p class="email-videocall-section" style="margin: 20px 0 0 0; font-size: 13px; color: #666666; line-height: 1.6;">
+        <p class="email-videocall-section" style="margin: 20px 0 0 0; font-size: 13px; color: #718096; line-height: 1.6;">
           O copie este enlace en su navegador:<br>
-          <span class="email-videocall-link" style="word-break: break-all; font-family: monospace; color: #0a1e3a;">${data.googleMeetLink || 'Pendiente'}</span>
+          <span class="email-videocall-link" style="word-break: break-all; font-family: monospace; color: #4a5568;">${data.googleMeetLink || 'Pendiente'}</span>
         </p>
       </div>
       ` : `
