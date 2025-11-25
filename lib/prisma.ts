@@ -5,9 +5,22 @@ const globalForPrisma = globalThis as unknown as {
 }
 
 function createPrismaClient() {
+  // Log en desarrollo para debug
+  if (process.env.NODE_ENV === 'development') {
+    const databaseUrl = process.env.DATABASE_URL || ''
+    const urlPreview = databaseUrl.replace(/:[^:@]+@/, ':****@') // Ocultar password
+    console.log('✅ Prisma Client creado con DATABASE_URL:', urlPreview)
+  }
+
   return new PrismaClient({
     log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
   })
+}
+
+// Limpiar instancia previa si existe (para forzar reinicialización)
+if (globalForPrisma.prisma) {
+  globalForPrisma.prisma.$disconnect().catch(() => {})
+  globalForPrisma.prisma = undefined
 }
 
 export const prisma =
