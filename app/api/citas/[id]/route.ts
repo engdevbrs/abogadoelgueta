@@ -2,13 +2,14 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { sendAprobacionCitaEmail, sendPagoPendienteCitaEmail } from '@/lib/email'
+import { sendAprobacionCitaEmail, sendPagoPendienteCitaEmail, sendRechazoCitaEmail } from '@/lib/email'
 import { createGoogleMeetEvent } from '@/lib/google-calendar'
 import { z } from 'zod'
 
 const updateCitaSchema = z.object({
   estado: z.enum(['PENDIENTE', 'PAGO_PENDIENTE', 'APROBADA', 'RECHAZADA', 'COMPLETADA', 'CANCELADA']),
   googleMeetLink: z.string().optional(),
+  motivoRechazo: z.string().optional(),
 })
 
 // GET - Obtener una cita específica
@@ -207,6 +208,21 @@ export async function PATCH(
         })
       } catch (emailError) {
         console.error('Error enviando email de aprobación:', emailError)
+        // No fallar la request si el email falla, pero loguear el error
+      }
+    }
+
+    // Si se rechazó la cita, enviar email de rechazo
+    if (validatedData.estado === 'RECHAZADA') {
+      try {
+        await sendRechazoCitaEmail(cita.email, {
+          nombre: cita.nombre,
+          motivoConsulta: cita.motivoConsulta,
+          fechaSolicitada: cita.fechaSolicitada,
+          motivoRechazo: validatedData.motivoRechazo || null,
+        })
+      } catch (emailError) {
+        console.error('Error enviando email de rechazo:', emailError)
         // No fallar la request si el email falla, pero loguear el error
       }
     }

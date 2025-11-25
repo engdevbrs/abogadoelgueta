@@ -5,6 +5,7 @@ import { formatDate, formatDateTime, getEstadoTexto } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Select,
@@ -13,6 +14,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { useToast } from '@/components/ui/use-toast'
 import { CheckCircle, XCircle, Clock, AlertCircle, ExternalLink, Loader2, Copy, Check, Search, Filter, ArrowUpDown, ChevronLeft, ChevronRight } from 'lucide-react'
 import type { EstadoCita } from '@/types'
@@ -52,6 +61,11 @@ export function CitasList() {
   const [loadingActions, setLoadingActions] = useState<Record<string, boolean>>({})
   const [copiedLinkId, setCopiedLinkId] = useState<string | null>(null)
   const { toast } = useToast()
+  
+  // Estado para el modal de rechazo
+  const [modalRechazoAbierto, setModalRechazoAbierto] = useState(false)
+  const [citaParaRechazar, setCitaParaRechazar] = useState<Cita | null>(null)
+  const [motivoRechazo, setMotivoRechazo] = useState('')
 
   // Nuevos estados para búsqueda, filtros y paginación
   const [busquedaNombre, setBusquedaNombre] = useState('')
@@ -158,6 +172,65 @@ export function CitasList() {
     setFechaHasta('')
     setPagina(1)
     // fetchCitas se ejecutará automáticamente con useEffect
+  }
+
+  const abrirModalRechazo = (cita: Cita) => {
+    setCitaParaRechazar(cita)
+    setMotivoRechazo('')
+    setModalRechazoAbierto(true)
+  }
+
+  const cerrarModalRechazo = () => {
+    setModalRechazoAbierto(false)
+    setCitaParaRechazar(null)
+    setMotivoRechazo('')
+  }
+
+  const confirmarRechazo = async () => {
+    if (!citaParaRechazar) return
+
+    const actionKey = `${citaParaRechazar.id}-RECHAZADA`
+    
+    try {
+      setLoadingActions((prev) => ({ ...prev, [actionKey]: true }))
+      
+      const response = await fetch(`/api/citas/${citaParaRechazar.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          estado: 'RECHAZADA',
+          motivoRechazo: motivoRechazo.trim() || undefined,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        toast({
+          title: 'Éxito',
+          description: 'La cita ha sido rechazada y se ha enviado un correo al usuario',
+        })
+        cerrarModalRechazo()
+        fetchCitas()
+      } else {
+        throw new Error(data.error || 'Error al rechazar la cita')
+      }
+    } catch (error) {
+      console.error('Error rechazando cita:', error)
+      toast({
+        title: 'Error',
+        description: 'No se pudo rechazar la cita',
+        variant: 'destructive',
+      })
+    } finally {
+      setLoadingActions((prev) => {
+        const newState = { ...prev }
+        delete newState[actionKey]
+        return newState
+      })
+    }
   }
 
   const updateEstado = async (citaId: string, nuevoEstado: EstadoCita) => {
@@ -554,7 +627,7 @@ export function CitasList() {
                         <Button
                           size="sm"
                           variant="destructive"
-                          onClick={() => updateEstado(cita.id, 'RECHAZADA')}
+                          onClick={() => abrirModalRechazo(cita)}
                           disabled={loadingActions[`${cita.id}-RECHAZADA`]}
                         >
                           {loadingActions[`${cita.id}-RECHAZADA`] ? (
@@ -587,7 +660,7 @@ export function CitasList() {
                         <Button
                           size="sm"
                           variant="destructive"
-                          onClick={() => updateEstado(cita.id, 'RECHAZADA')}
+                          onClick={() => abrirModalRechazo(cita)}
                           disabled={loadingActions[`${cita.id}-RECHAZADA`]}
                         >
                           {loadingActions[`${cita.id}-RECHAZADA`] ? (
@@ -678,6 +751,70 @@ export function CitasList() {
           </Button>
         </div>
       )}
+
+      {/* Modal de rechazo */}
+      <Dialog open={modalRechazoAbierto} onOpenChange={(open) => {
+        if (!open) {
+          cerrarModalRechazo()
+        }
+      }}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Rechazar Solicitud de Cita</DialogTitle>
+            <DialogDescription>
+              {citaParaRechazar && (
+                <>
+                  Estás a punto de rechazar la solicitud de <strong>{citaParaRechazar.nombre}</strong>.
+                  {citaParaRechazar.motivoConsulta && (
+                    <> Motivo de consulta: <strong>{citaParaRechazar.motivoConsulta}</strong></>
+                  )}
+                </>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="motivoRechazo">
+                Motivo del rechazo <span className="text-gray-500 text-sm">(Opcional)</span>
+              </Label>
+              <Textarea
+                id="motivoRechazo"
+                placeholder="Explique el motivo del rechazo. Este mensaje se enviará al usuario por correo electrónico."
+                value={motivoRechazo}
+                onChange={(e) => setMotivoRechazo(e.target.value)}
+                rows={5}
+                className="resize-none"
+              />
+              <p className="text-xs text-gray-500">
+                Si no proporciona un motivo, se enviará un mensaje genérico al usuario.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={cerrarModalRechazo}
+              disabled={loadingActions[`${citaParaRechazar?.id}-RECHAZADA`]}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmarRechazo}
+              disabled={loadingActions[`${citaParaRechazar?.id}-RECHAZADA`]}
+            >
+              {loadingActions[`${citaParaRechazar?.id}-RECHAZADA`] ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Procesando...
+                </>
+              ) : (
+                'Confirmar Rechazo'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

@@ -183,6 +183,13 @@ interface AprobacionCitaData {
   fechaSolicitada?: Date | null
 }
 
+interface RechazoCitaData {
+  nombre: string
+  motivoConsulta: string
+  fechaSolicitada?: Date | null
+  motivoRechazo?: string | null
+}
+
 interface NotificacionNuevaCitaData {
   nombre: string
   email: string
@@ -642,6 +649,145 @@ export async function sendAprobacionCitaEmail(
     return emailData
   } catch (error) {
     console.error('Error en sendAprobacionCitaEmail:', error)
+    throw error
+  }
+}
+
+/**
+ * Envía email al usuario cuando su solicitud de cita es rechazada
+ */
+export async function sendRechazoCitaEmail(
+  to: string,
+  data: RechazoCitaData
+) {
+  if (!resend) {
+    console.warn('Resend no está configurado. Email no enviado.')
+    return null
+  }
+
+  try {
+    const fecha = data.fechaSolicitada 
+      ? new Intl.DateTimeFormat('es-CL', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          timeZone: 'America/Santiago',
+        }).format(new Date(data.fechaSolicitada))
+      : 'No especificada'
+
+    const htmlContent = `
+      <div style="text-align: center; margin-bottom: 30px;">
+        <div style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: #ffffff; padding: 15px; border-radius: 8px; display: inline-block;">
+          <p style="margin: 0; font-size: 18px; font-weight: 600;">✕ Solicitud Rechazada</p>
+        </div>
+      </div>
+      
+      <h2 class="email-text" style="color: #0a1e3a; margin: 0 0 20px 0; font-size: 24px; font-weight: 600;">
+        Lamentamos informarle
+      </h2>
+      
+      <p class="email-text" style="margin: 0 0 16px 0; font-size: 16px; color: #333333;">
+        Estimado/a <strong style="color: #0a1e3a;">${data.nombre}</strong>,
+      </p>
+      
+      <p class="email-text-secondary" style="margin: 0 0 30px 0; font-size: 16px; color: #555555; line-height: 1.6;">
+        Lamentamos informarle que su solicitud de consulta sobre: <strong style="color: #0a1e3a;">${data.motivoConsulta}</strong> no ha podido ser aprobada en esta ocasión.
+      </p>
+      
+      ${data.fechaSolicitada ? `
+      <div class="email-card" style="background-color: #f8f9fa; border-left: 4px solid #4a5568; padding: 20px; margin: 30px 0; border-radius: 4px;">
+        <h3 style="color: #2d3748; margin: 0 0 15px 0; font-size: 18px; font-weight: 600;">
+          📅 Fecha Solicitada
+        </h3>
+        <p class="email-text-secondary" style="margin: 0; font-size: 16px; color: #555555; font-weight: 600;">
+          ${fecha}
+        </p>
+      </div>
+      ` : ''}
+      
+      ${data.motivoRechazo ? `
+      <div class="email-card" style="background-color: #f8f9fa; border-left: 4px solid #ef4444; padding: 20px; margin: 30px 0; border-radius: 4px;">
+        <h3 style="color: #991b1b; margin: 0 0 15px 0; font-size: 18px; font-weight: 600;">
+          📝 Motivo del Rechazo
+        </h3>
+        <p class="email-text-secondary" style="margin: 0; font-size: 15px; color: #555555; line-height: 1.6; white-space: pre-wrap;">
+          ${data.motivoRechazo}
+        </p>
+      </div>
+      ` : ''}
+      
+      <div style="background-color: #fee2e2; border-left: 4px solid #ef4444; padding: 20px; margin: 30px 0; border-radius: 4px;">
+        <h3 style="color: #991b1b; margin: 0 0 15px 0; font-size: 18px; font-weight: 600;">
+          ℹ️ Información Importante
+        </h3>
+        <p style="margin: 0 0 12px 0; font-size: 15px; color: #991b1b; line-height: 1.6;">
+          Si tiene alguna pregunta sobre esta decisión o desea realizar una nueva solicitud, no dude en contactarnos.
+        </p>
+        <p style="margin: 0; font-size: 15px; color: #991b1b; line-height: 1.6;">
+          Estaremos encantados de ayudarle con sus necesidades legales en el futuro.
+        </p>
+      </div>
+      
+      <div style="background-color: #e8f4f8; border: 1px solid #0a1e3a; border-radius: 6px; padding: 20px; margin: 30px 0; text-align: center;">
+        <p style="margin: 0; font-size: 15px; color: #0a1e3a; font-weight: 600;">
+          💡 ¿Necesita más información?
+        </p>
+        <p class="email-text-secondary" style="margin: 12px 0 0 0; font-size: 14px; color: #555555; line-height: 1.6;">
+          Si tiene alguna consulta o desea solicitar una nueva cita, puede contactarnos a través de nuestro formulario de contacto en el sitio web.
+        </p>
+      </div>
+      
+      <p class="email-text-secondary" style="margin: 30px 0 0 0; font-size: 15px; color: #555555; line-height: 1.6;">
+        Agradecemos su interés en nuestros servicios legales.
+      </p>
+      
+      <p class="email-text" style="margin: 30px 0 0 0; font-size: 15px; color: #333333; line-height: 1.6;">
+        Atentamente,<br>
+        <strong style="color: #0a1e3a;">Abogado Elgueta</strong>
+      </p>
+    `
+
+    const { data: emailData, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: [to],
+      subject: 'Solicitud de Consulta Rechazada - Abogado Elgueta',
+      html: getEmailTemplate(htmlContent),
+      text: `
+        Solicitud de Consulta Rechazada - Abogado Elgueta
+
+        Estimado/a ${data.nombre},
+
+        Lamentamos informarle que su solicitud de consulta sobre: ${data.motivoConsulta} no ha podido ser aprobada en esta ocasión.
+
+        ${data.fechaSolicitada ? `
+        Fecha Solicitada:
+        ${fecha}
+        ` : ''}
+
+        Información Importante:
+        Si tiene alguna pregunta sobre esta decisión o desea realizar una nueva solicitud, no dude en contactarnos.
+        Estaremos encantados de ayudarle con sus necesidades legales en el futuro.
+
+        ¿Necesita más información?
+        Si tiene alguna consulta o desea solicitar una nueva cita, puede contactarnos a través de nuestro formulario de contacto en el sitio web.
+
+        Agradecemos su interés en nuestros servicios legales.
+
+        Atentamente,
+        Abogado Elgueta
+      `,
+    })
+
+    if (error) {
+      console.error('Error enviando email:', error)
+      throw error
+    }
+
+    return emailData
+  } catch (error) {
+    console.error('Error en sendRechazoCitaEmail:', error)
     throw error
   }
 }
