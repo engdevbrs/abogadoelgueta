@@ -257,12 +257,10 @@ export async function sendConfirmacionCitaEmail(
             <td class="email-text" style="padding: 8px 0; font-weight: 600; color: #333333; font-size: 14px;">Número de Cuenta:</td>
             <td class="email-text-secondary" style="padding: 8px 0; color: #555555; font-size: 14px; font-family: monospace; word-break: break-all;">${BANCO_NUMERO}</td>
           </tr>
-          ${BANCO_RUT ? `
           <tr>
             <td class="email-text" style="padding: 8px 0; font-weight: 600; color: #333333; font-size: 14px;">RUT:</td>
-            <td class="email-text-secondary" style="padding: 8px 0; color: #555555; font-size: 14px;">${BANCO_RUT}</td>
+            <td class="email-text-secondary" style="padding: 8px 0; color: #555555; font-size: 14px;">${BANCO_RUT || 'No especificado'}</td>
           </tr>
-          ` : ''}
           <tr>
             <td class="email-text" style="padding: 8px 0; font-weight: 600; color: #333333; font-size: 14px;">Titular:</td>
             <td class="email-text-secondary" style="padding: 8px 0; color: #555555; font-size: 14px;">${BANCO_NOMBRE_TITULAR}</td>
@@ -304,9 +302,11 @@ export async function sendConfirmacionCitaEmail(
         Su solicitud ha sido registrada y está pendiente de revisión y aprobación.
 
         Información de Pago:
+        Banco: ${BANCO_CUENTA}
         Tipo de Cuenta: ${BANCO_TIPO}
         Número de Cuenta: ${BANCO_NUMERO}
-        Banco: ${BANCO_CUENTA}
+        RUT: ${BANCO_RUT || 'No especificado'}
+        Titular: ${BANCO_NOMBRE_TITULAR}
 
         Una vez que hayamos verificado el pago, aprobaremos su solicitud y le enviaremos un correo con el enlace para unirse a la videollamada mediante Google Meet.
 
@@ -413,12 +413,10 @@ export async function sendPagoPendienteCitaEmail(
             <td class="email-text" style="padding: 8px 0; font-weight: 600; color: #333333; font-size: 14px;">Número de Cuenta:</td>
             <td class="email-text-secondary" style="padding: 8px 0; color: #555555; font-size: 14px; font-family: monospace; word-break: break-all;">${BANCO_NUMERO}</td>
           </tr>
-          ${BANCO_RUT ? `
           <tr>
             <td class="email-text" style="padding: 8px 0; font-weight: 600; color: #333333; font-size: 14px;">RUT:</td>
-            <td class="email-text-secondary" style="padding: 8px 0; color: #555555; font-size: 14px;">${BANCO_RUT}</td>
+            <td class="email-text-secondary" style="padding: 8px 0; color: #555555; font-size: 14px;">${BANCO_RUT || 'No especificado'}</td>
           </tr>
-          ` : ''}
           <tr>
             <td class="email-text" style="padding: 8px 0; font-weight: 600; color: #333333; font-size: 14px;">Titular:</td>
             <td class="email-text-secondary" style="padding: 8px 0; color: #555555; font-size: 14px;">${BANCO_NOMBRE_TITULAR}</td>
@@ -470,7 +468,7 @@ export async function sendPagoPendienteCitaEmail(
         Banco: ${BANCO_CUENTA}
         Tipo de Cuenta: ${BANCO_TIPO}
         Número de Cuenta: ${BANCO_NUMERO}
-        ${BANCO_RUT ? `RUT: ${BANCO_RUT}` : ''}
+        RUT: ${BANCO_RUT || 'No especificado'}
         Titular: ${BANCO_NOMBRE_TITULAR}
 
         Próximos Pasos:

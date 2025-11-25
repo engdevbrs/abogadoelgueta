@@ -32,7 +32,7 @@ ADMIN_EMAIL="adrianep@elguetabogado.cl"
 BANCO_CUENTA="Banco de Chile"
 BANCO_TIPO="Cuenta Corriente"
 BANCO_NUMERO="1234567890"
-BANCO_RUT=""
+BANCO_RUT="200202848"
 BANCO_NOMBRE_TITULAR="Abogado Elgueta"
 
 # Google Calendar API (Opcional - para Google Meet links automáticos)
