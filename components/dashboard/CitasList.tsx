@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { formatDate, formatDateTime, getEstadoTexto } from '@/lib/utils'
+import { formatDate, formatDateTime, getEstadoTexto, cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -66,6 +66,7 @@ export function CitasList() {
   const [modalRechazoAbierto, setModalRechazoAbierto] = useState(false)
   const [citaParaRechazar, setCitaParaRechazar] = useState<Cita | null>(null)
   const [motivoRechazo, setMotivoRechazo] = useState('')
+  const [errorMotivoRechazo, setErrorMotivoRechazo] = useState('')
 
   // Nuevos estados para búsqueda, filtros y paginación
   const [busquedaNombre, setBusquedaNombre] = useState('')
@@ -184,11 +185,19 @@ export function CitasList() {
     setModalRechazoAbierto(false)
     setCitaParaRechazar(null)
     setMotivoRechazo('')
+    setErrorMotivoRechazo('')
   }
 
   const confirmarRechazo = async () => {
     if (!citaParaRechazar) return
 
+    // Validar que el motivo esté presente
+    if (!motivoRechazo.trim()) {
+      setErrorMotivoRechazo('El motivo del rechazo es obligatorio')
+      return
+    }
+
+    setErrorMotivoRechazo('')
     const actionKey = `${citaParaRechazar.id}-RECHAZADA`
     
     try {
@@ -201,7 +210,7 @@ export function CitasList() {
         },
         body: JSON.stringify({ 
           estado: 'RECHAZADA',
-          motivoRechazo: motivoRechazo.trim() || undefined,
+          motivoRechazo: motivoRechazo.trim(),
         }),
       })
 
@@ -775,19 +784,35 @@ export function CitasList() {
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="motivoRechazo">
-                Motivo del rechazo <span className="text-gray-500 text-sm">(Opcional)</span>
+                Motivo del rechazo <span className="text-red-500">*</span>
               </Label>
               <Textarea
                 id="motivoRechazo"
                 placeholder="Explique el motivo del rechazo. Este mensaje se enviará al usuario por correo electrónico."
                 value={motivoRechazo}
-                onChange={(e) => setMotivoRechazo(e.target.value)}
+                onChange={(e) => {
+                  setMotivoRechazo(e.target.value)
+                  if (errorMotivoRechazo && e.target.value.trim()) {
+                    setErrorMotivoRechazo('')
+                  }
+                }}
                 rows={5}
-                className="resize-none"
+                className={cn(
+                  "resize-none",
+                  errorMotivoRechazo && "border-red-500 focus:border-red-500 focus:ring-red-500"
+                )}
+                required
               />
-              <p className="text-xs text-gray-500">
-                Si no proporciona un motivo, se enviará un mensaje genérico al usuario.
-              </p>
+              {errorMotivoRechazo && (
+                <p className="text-xs text-red-500">
+                  {errorMotivoRechazo}
+                </p>
+              )}
+              {!errorMotivoRechazo && (
+                <p className="text-xs text-gray-500">
+                  Este motivo se enviará al usuario por correo electrónico.
+                </p>
+              )}
             </div>
           </div>
           <DialogFooter>

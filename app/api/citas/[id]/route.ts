@@ -10,6 +10,15 @@ const updateCitaSchema = z.object({
   estado: z.enum(['PENDIENTE', 'PAGO_PENDIENTE', 'APROBADA', 'RECHAZADA', 'COMPLETADA', 'CANCELADA']),
   googleMeetLink: z.string().optional(),
   motivoRechazo: z.string().optional(),
+}).refine((data) => {
+  // Si el estado es RECHAZADA, motivoRechazo es obligatorio
+  if (data.estado === 'RECHAZADA' && (!data.motivoRechazo || !data.motivoRechazo.trim())) {
+    return false
+  }
+  return true
+}, {
+  message: 'El motivo del rechazo es obligatorio',
+  path: ['motivoRechazo'],
 })
 
 // GET - Obtener una cita específica

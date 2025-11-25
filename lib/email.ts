@@ -707,16 +707,14 @@ export async function sendRechazoCitaEmail(
       </div>
       ` : ''}
       
-      ${data.motivoRechazo ? `
       <div class="email-card" style="background-color: #f8f9fa; border-left: 4px solid #ef4444; padding: 20px; margin: 30px 0; border-radius: 4px;">
         <h3 style="color: #991b1b; margin: 0 0 15px 0; font-size: 18px; font-weight: 600;">
           📝 Motivo del Rechazo
         </h3>
         <p class="email-text-secondary" style="margin: 0; font-size: 15px; color: #555555; line-height: 1.6; white-space: pre-wrap;">
-          ${data.motivoRechazo}
+          ${data.motivoRechazo || 'No se proporcionó un motivo específico.'}
         </p>
       </div>
-      ` : ''}
       
       <div style="background-color: #fee2e2; border-left: 4px solid #ef4444; padding: 20px; margin: 30px 0; border-radius: 4px;">
         <h3 style="color: #991b1b; margin: 0 0 15px 0; font-size: 18px; font-weight: 600;">
@@ -765,6 +763,9 @@ export async function sendRechazoCitaEmail(
         Fecha Solicitada:
         ${fecha}
         ` : ''}
+
+        Motivo del Rechazo:
+        ${data.motivoRechazo || 'No se proporcionó un motivo específico.'}
 
         Información Importante:
         Si tiene alguna pregunta sobre esta decisión o desea realizar una nueva solicitud, no dude en contactarnos.
