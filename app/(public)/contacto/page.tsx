@@ -104,7 +104,6 @@ export default function ContactoPage() {
                     <div>
                       <h3 className="font-semibold text-lg mb-1">Email</h3>
                       <p className="text-gray-600">adrianep@elguetabogado.cl</p>
-                      <p className="text-sm text-gray-500 mt-1">(Pendiente de configurar)</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-4">
@@ -113,8 +112,7 @@ export default function ContactoPage() {
                     </div>
                     <div>
                       <h3 className="font-semibold text-lg mb-1">Teléfono</h3>
-                      <p className="text-gray-600">+56 9 XXXX XXXX</p>
-                      <p className="text-sm text-gray-500 mt-1">(Pendiente de configurar)</p>
+                      <p className="text-gray-600">+56 9 4030 2822</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-4">
@@ -124,7 +122,7 @@ export default function ContactoPage() {
                     <div>
                       <h3 className="font-semibold text-lg mb-1">Ubicación</h3>
                       <p className="text-gray-600">Dirección de oficina</p>
-                      <p className="text-sm text-gray-500 mt-1">(Pendiente de definir)</p>
+                      <p className="text-sm text-gray-500 mt-1">O&apos;higgins 236, oficina 412, edificio Studiowork</p>
                     </div>
                   </div>
                 </CardContent>
