@@ -17,26 +17,83 @@ const solicitudCitaSchema = z.object({
 })
 
 /**
- * Verifica si una fecha es día laborable (lunes a viernes)
+ * Obtiene la hora en zona horaria de Chile (America/Santiago)
+ */
+function obtenerHoraChile(fecha: Date): { hora: number; minutos: number; segundos: number } {
+  const formatter = new Intl.DateTimeFormat('es-CL', {
+    timeZone: 'America/Santiago',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false, // Forzar formato de 24 horas
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+  })
+  
+  const partes = formatter.formatToParts(fecha)
+  const hora = parseInt(partes.find(p => p.type === 'hour')?.value || '0', 10)
+  const minutos = parseInt(partes.find(p => p.type === 'minute')?.value || '0', 10)
+  const segundos = parseInt(partes.find(p => p.type === 'second')?.value || '0', 10)
+  
+  return { hora, minutos, segundos }
+}
+
+/**
+ * Obtiene el día de la semana en zona horaria de Chile (0 = domingo, 6 = sábado)
+ */
+function obtenerDiaSemanaChile(fecha: Date): number {
+  // Obtener las partes de la fecha en hora de Chile
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/Santiago',
+    weekday: 'long',
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+  })
+  
+  const partes = formatter.formatToParts(fecha)
+  const año = parseInt(partes.find(p => p.type === 'year')?.value || '0', 10)
+  const mes = parseInt(partes.find(p => p.type === 'month')?.value || '0', 10) - 1 // Mes es 0-indexed
+  const dia = parseInt(partes.find(p => p.type === 'day')?.value || '0', 10)
+  const weekday = partes.find(p => p.type === 'weekday')?.value || ''
+  
+  // Mapear el nombre del día a número (0 = domingo, 6 = sábado)
+  const weekdayMap: Record<string, number> = {
+    'Sunday': 0,
+    'Monday': 1,
+    'Tuesday': 2,
+    'Wednesday': 3,
+    'Thursday': 4,
+    'Friday': 5,
+    'Saturday': 6,
+  }
+  
+  return weekdayMap[weekday] ?? new Date(año, mes, dia).getDay()
+}
+
+/**
+ * Verifica si una fecha es día laborable (lunes a viernes) en hora de Chile
  */
 function esDiaLaborable(fecha: Date): boolean {
-  const dia = fecha.getDay() // 0 = domingo, 6 = sábado
+  const dia = obtenerDiaSemanaChile(fecha) // 0 = domingo, 6 = sábado
   return dia >= 1 && dia <= 5 // Lunes (1) a Viernes (5)
 }
 
 /**
- * Verifica si la hora está en el rango laboral (8 AM - 6 PM)
+ * Verifica si la hora está en el rango laboral (8 AM - 6 PM) en hora de Chile
  */
 function esHoraLaboral(fecha: Date): boolean {
-  const hora = fecha.getHours()
+  const { hora } = obtenerHoraChile(fecha)
   return hora >= 8 && hora < 18
 }
 
 /**
- * Verifica si la hora es múltiplo de 1 hora (8:00, 9:00, etc.)
+ * Verifica si la hora es múltiplo de 1 hora (8:00, 9:00, etc.) en hora de Chile
  */
 function esHoraExacta(fecha: Date): boolean {
-  return fecha.getMinutes() === 0 && fecha.getSeconds() === 0
+  const { minutos, segundos } = obtenerHoraChile(fecha)
+  return minutos === 0 && segundos === 0
 }
 
 export async function POST(request: NextRequest) {

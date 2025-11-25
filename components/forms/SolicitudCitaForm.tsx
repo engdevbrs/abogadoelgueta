@@ -36,7 +36,8 @@ const solicitudCitaSchema = z.object({
   fechaHora: z.string().optional(),
   mensaje: z.string().optional(),
 }).refine((data) => {
-  // Solo validar fechaHora si hay motivoConsulta
+  // Solo validar fechaHora si hay motivoConsulta Y solo al enviar el formulario
+  // No validar durante la selección de fecha/hora
   if (data.motivoConsulta && !data.fechaHora) {
     return false
   }
@@ -57,10 +58,13 @@ export function SolicitudCitaForm() {
     handleSubmit,
     setValue,
     watch,
+    clearErrors,
     formState: { errors },
     reset,
   } = useForm<SolicitudCitaFormData>({
     resolver: zodResolver(solicitudCitaSchema),
+    mode: 'onSubmit', // Solo validar al enviar el formulario, no durante la interacción
+    reValidateMode: 'onSubmit', // Revalidar solo al enviar
   })
 
   const motivoConsulta = watch('motivoConsulta')
@@ -186,7 +190,15 @@ export function SolicitudCitaForm() {
           <DateTimePicker
             value={fechaHora}
             onChange={(value) => {
-              setValue('fechaHora', value || '', { shouldValidate: true })
+              // Establecer el valor sin validar inmediatamente
+              setValue('fechaHora', value || '', { 
+                shouldValidate: false, 
+                shouldDirty: true 
+              })
+              // Si hay un valor válido, limpiar el error manualmente
+              if (value) {
+                clearErrors('fechaHora')
+              }
             }}
             error={errors.fechaHora?.message}
           />
