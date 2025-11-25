@@ -775,7 +775,10 @@ export function CitasList() {
                 <>
                   Estás a punto de rechazar la solicitud de <strong>{citaParaRechazar.nombre}</strong>.
                   {citaParaRechazar.motivoConsulta && (
+                    <>
+                      <br />
                     <> Motivo de consulta: <strong>{citaParaRechazar.motivoConsulta}</strong></>
+                    </>
                   )}
                 </>
               )}
